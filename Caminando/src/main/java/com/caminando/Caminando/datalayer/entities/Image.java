@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 @Entity
 @Table(name = "image")
@@ -18,29 +19,34 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Image extends BaseEntity {
 
+    @URL
     private String imageURL;
 
-    @OneToOne(mappedBy = "profileImage")
+    @OneToOne(mappedBy = "profileImage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
 
-    @OneToOne(mappedBy = "coverImage")
+    @OneToOne(mappedBy = "coverImage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Trip trip;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "step_id")
     private Step step;
 
-    @OneToOne(mappedBy = "image")
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private SuggestItinerary suggestItinerary;
 
-    @OneToOne(mappedBy = "image")
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ToDo toDo;
-    @OneToOne(mappedBy = "image")
+
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Restaurant restaurant;
-    @OneToOne(mappedBy = "image")
+
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private QuickFacts quickFacts;
-    @OneToOne(mappedBy = "image")
+
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private PlaceToStay placeToStay;
-    @OneToOne(mappedBy = "image")
+
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Food food;
 }

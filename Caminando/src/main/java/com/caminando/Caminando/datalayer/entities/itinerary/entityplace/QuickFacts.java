@@ -2,6 +2,7 @@ package com.caminando.Caminando.datalayer.entities.itinerary.entityplace;
 
 import com.caminando.Caminando.datalayer.entities.Image;
 import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
+import com.caminando.Caminando.datalayer.entities.travel.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,9 +13,11 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Builder(setterPrefix = "with")
-public class QuickFacts extends SuggestPlacesBase {
+public class QuickFacts extends BaseEntity {
 
+    @Column(length = 50, nullable = false)
     private String title;
+    @Column(length = 50, nullable = false)
     private String description;
 
     @OneToOne

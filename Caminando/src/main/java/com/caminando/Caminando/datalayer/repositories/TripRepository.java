@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long> {
 
-    Optional<Trip> findOneByName(String title);
+    Optional<Trip> findOneByTitle(String title);
 }

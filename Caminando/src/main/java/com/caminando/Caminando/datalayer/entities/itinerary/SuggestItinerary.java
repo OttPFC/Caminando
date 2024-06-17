@@ -14,35 +14,52 @@ import java.util.List;
 @Table(name = "itinerary")
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder(setterPrefix = "with")
 public class SuggestItinerary extends BaseEntity {
 
+    @Column(length = 50, nullable = false)
     private String name;
-    private String description;
-    private String location;
-    private LocalDate createdDate = LocalDate.now();
-    private LocalDate modifyDate = LocalDate.now();
-    private Integer likes;
-    private String suggest;
 
-    @OneToOne
+    @Column(length = 50, nullable = false)
+    private String description;
+
+    @Column(length = 50, nullable = false)
+    private String location;
+
+    @Builder.Default
+    private LocalDate createdDate = LocalDate.now();
+
+    @Builder.Default
+    private LocalDate modifyDate = LocalDate.now();
+
+    private Integer likes;
+
+    @ElementCollection
+    @CollectionTable(name = "itinerary_suggestions", joinColumns = @JoinColumn(name = "itinerary_id"))
+    @Column(name = "suggest")
+    private List<String> suggest;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
-    @OneToOne
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     private Image image;
 
-    @OneToMany(mappedBy = "suggestItinerary")
+    @OneToMany(mappedBy = "suggestItinerary", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ToDo> toDo;
-    @OneToMany(mappedBy = "suggestItinerary")
+
+    @OneToMany(mappedBy = "suggestItinerary", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Restaurant> restaurant;
-    @OneToMany(mappedBy = "suggestItinerary")
+
+    @OneToMany(mappedBy = "suggestItinerary", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuickFacts> quickFacts;
-    @OneToMany(mappedBy = "suggestItinerary")
+
+    @OneToMany(mappedBy = "suggestItinerary", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PlaceToStay> placeToStay;
-    @OneToMany(mappedBy = "suggestItinerary")
+
+    @OneToMany(mappedBy = "suggestItinerary", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Food> food;
-
-
 }
