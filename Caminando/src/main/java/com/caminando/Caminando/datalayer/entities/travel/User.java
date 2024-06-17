@@ -46,6 +46,9 @@ public class User extends BaseEntity {
 
     private int followers;
 
+    @Column(nullable = false)
+    private boolean isEnabled;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @BatchSize(size = 10)
     private List<Trip> trips = new ArrayList<>();

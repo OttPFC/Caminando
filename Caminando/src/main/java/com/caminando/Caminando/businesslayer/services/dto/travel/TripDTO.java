@@ -26,6 +26,7 @@ public class TripDTO extends BaseDTO {
     private LocalDate endDate;
     private Status status;
     private Privacy privacy;
+    private User user;
 //    private RegisteredUserDTO user;
 //    private List<StepDTO> steps;
 //    private ImageDTO coverImage;

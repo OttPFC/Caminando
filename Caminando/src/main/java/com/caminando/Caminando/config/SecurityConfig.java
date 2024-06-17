@@ -18,24 +18,24 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity()
+@EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-public class ApplicationSecurityConfig {
+public class SecurityConfig {
 
 	@Bean
-	PasswordEncoder stdPasswordEncoder() {
+	public PasswordEncoder stdPasswordEncoder() {
 		return new BCryptPasswordEncoder(11);
 	}
 
 	@Bean
-	AuthTokenFilter authenticationJwtToken() {
+	public AuthTokenFilter authenticationJwtToken() {
 		return new AuthTokenFilter();
 	}
 
 	@Bean
 	public AuthenticationManager authenticationManager(HttpSecurity http,
-			PasswordEncoder passwordEncoder,
-			UserDetailsService userDetailsService) throws Exception {
+													   PasswordEncoder passwordEncoder,
+													   UserDetailsService userDetailsService) throws Exception {
 		AuthenticationManagerBuilder authenticationManagerBuilder =
 				http.getSharedObject(AuthenticationManagerBuilder.class);
 
@@ -47,14 +47,12 @@ public class ApplicationSecurityConfig {
 	}
 
 	@Bean
-	SecurityFilterChain web(HttpSecurity http) throws Exception {
+	public SecurityFilterChain web(HttpSecurity http) throws Exception {
 		http
 				.csrf(AbstractHttpConfigurer::disable)
-				.authorizeHttpRequests(authorize ->
-				authorize
-
+				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers("/api/user/login").permitAll()
-						.requestMatchers(HttpMethod.POST,"/api/user").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
 						.requestMatchers(HttpMethod.GET, "/**").authenticated()
 						.requestMatchers(HttpMethod.POST, "/**").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.PATCH, "/api/user/{id}").authenticated()
@@ -63,12 +61,9 @@ public class ApplicationSecurityConfig {
 						.requestMatchers("/**").authenticated()
 				)
 				.httpBasic(Customizer.withDefaults())
-				.sessionManagement(
-
-						sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.addFilterBefore(authenticationJwtToken(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
-
 }
