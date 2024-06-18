@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
         if (emailDuplicated.isPresent()) {
             throw new DuplicateEmailException(newUser.getEmail());
-        }else if (usernameDuplicated.isPresent()) {
+        } else if (usernameDuplicated.isPresent()) {
             throw new DuplicateUsernameException(newUser.getUsername());
         } else {
             try {
@@ -85,8 +86,12 @@ public class UserServiceImpl implements UserService {
                 userEntity.setPassword(p);
                 var totalUsers = this.getAll(defaultPageable);
 
-                if (totalUsers.getTotalElements() == 0)
-                {
+                // Assicurati che la lista dei ruoli sia inizializzata
+                if (userEntity.getRoles() == null) {
+                    userEntity.setRoles(new ArrayList<>());
+                }
+
+                if (totalUsers.getTotalElements() == 0) {
                     userEntity.getRoles().add(
                             RoleEntity.builder()
                                     .withRoleType("ADMIN")
@@ -99,9 +104,10 @@ public class UserServiceImpl implements UserService {
                                     .build()
                     );
                 }
+                userEntity.setEnabled(true);
                 var u = mapRegisteredUser.map(usersRepository.save(userEntity));
-//                mailService.sendMail(newUser.getEmail(), "Registrazione avvenuta con successo",
-//                        newUser.getFirstName() + " " + newUser.getLastName() + " hai effettuato con successo la tua registrazione" );
+                // mailService.sendMail(newUser.getEmail(), "Registrazione avvenuta con successo",
+                //        newUser.getFirstName() + " " + newUser.getLastName() + " hai effettuato con successo la tua registrazione" );
                 return u;
             } catch (Exception e) {
                 log.error(String.format("Exception saving user %s", usersRepository), e);
@@ -109,6 +115,7 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
+
 
     @Override
     public Optional<LoginResponseDTO> login(String username, String password) {

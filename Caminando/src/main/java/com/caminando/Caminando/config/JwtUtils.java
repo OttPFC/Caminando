@@ -21,7 +21,7 @@ public class JwtUtils {
 	private long expirationMs;
 
 	private SecretKey getSigningKey() {
-		byte[] keyBytes = Decoders.BASE64.decode(securityKey);
+		byte[] keyBytes = securityKey.getBytes();
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
 
@@ -45,7 +45,6 @@ public class JwtUtils {
 					.parseClaimsJws(token);
 			return true;
 		} catch (Exception e) {
-			// Aggiungi log dettagliati per migliorare il debugging
 			return false;
 		}
 	}

@@ -36,10 +36,10 @@ public class User extends BaseEntity {
     @Column(length = 125, nullable = false)
     private String password;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50)
     private String description;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50)
     private String city;
 
     private int follow;

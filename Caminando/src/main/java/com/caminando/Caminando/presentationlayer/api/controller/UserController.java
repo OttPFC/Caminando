@@ -1,4 +1,4 @@
-package com.caminando.Caminando.presentationlayer.api;
+package com.caminando.Caminando.presentationlayer.api.controller;
 
 import com.caminando.Caminando.businesslayer.services.dto.user.LoginResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisterUserDTO;
@@ -31,7 +31,7 @@ public class UserController {
     private UserService user;
 
     @GetMapping
-    public ResponseEntity<Page<User>> getEvents (Pageable p) {
+    public ResponseEntity<Page<User>> getUsers (Pageable p) {
         var allUsers = user.getAll(p);
         var headers = new HttpHeaders();
         headers.add("Totale", String.valueOf(allUsers.getTotalElements()));
@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<RegisteredUserDTO> getEvent (@PathVariable Long id) {
+    public ResponseEntity<RegisteredUserDTO> getUser (@PathVariable Long id) {
         var u = user.getById(id);
         return new ResponseEntity<>(u, HttpStatus.FOUND);
     }
