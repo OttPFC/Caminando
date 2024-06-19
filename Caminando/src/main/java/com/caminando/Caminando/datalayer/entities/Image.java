@@ -22,6 +22,8 @@ public class Image extends BaseEntity {
     @URL
     private String imageURL;
 
+    private String description;
+
     @OneToOne(mappedBy = "profileImage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
 

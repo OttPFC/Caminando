@@ -1,10 +1,11 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
 import com.caminando.Caminando.businesslayer.services.dto.travel.TripDTO;
+import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.TripService;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
 import com.caminando.Caminando.datalayer.entities.travel.User;
-import com.caminando.Caminando.datalayer.repositories.TripRepository;
+import com.caminando.Caminando.datalayer.repositories.travel.TripRepository;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.utility.EntityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,11 +30,17 @@ public class TripServiceImpl implements TripService {
     private UserRepository userRepository;
 
     @Autowired
+    private Mapper<TripDTO, Trip> tripDTOToEntityMapper;
+
+    @Autowired
+    private Mapper<Trip, TripDTO> tripEntityToDTOMapper;
+
+    @Autowired
     EntityUtils utils;
 
     @Override
-    public Page<Trip> getAll(Pageable p) {
-        return tripRepository.findAll(p);
+    public Page<Trip> getAll(Pageable pageable) {
+        return tripRepository.findAll(pageable);
     }
 
     @Override
@@ -42,26 +50,19 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
+    @Transactional
     public Trip save(TripDTO tripDTO) {
-
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Trip trip = new Trip();
-        trip.setTitle(tripDTO.getTitle());
-        trip.setDescription(tripDTO.getDescription());
-        trip.setLikes(tripDTO.getLikes());
-        trip.setStartDate(tripDTO.getStartDate());
-        trip.setEndDate(tripDTO.getEndDate());
-        trip.setStatus(tripDTO.getStatus());
-        trip.setPrivacy(tripDTO.getPrivacy());
+        Trip trip = tripDTOToEntityMapper.map(tripDTO);
         trip.setUser(user);
-
 
         return tripRepository.save(trip);
     }
 
     @Override
+    @Transactional
     public Trip update(Long id, Trip tripDetails) {
         Optional<Trip> optionalTrip = tripRepository.findById(id);
         if (optionalTrip.isPresent()) {
@@ -73,6 +74,7 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
+    @Transactional
     public Trip delete(Long id) {
         Optional<Trip> optionalTrip = tripRepository.findById(id);
         if (optionalTrip.isPresent()) {
@@ -81,5 +83,15 @@ public class TripServiceImpl implements TripService {
             return trip;
         }
         return null;
+    }
+
+    @Override
+    public TripDTO mapEntityToDTO(Trip trip) {
+        return tripEntityToDTOMapper.map(trip);
+    }
+
+    @Override
+    public Trip getTripByIdAndUserId(Long tripId, Long userId) {
+        return tripRepository.findByIdAndUserId(tripId, userId).orElse(null);
     }
 }

@@ -2,12 +2,7 @@ package com.caminando.Caminando.businesslayer.services.dto.travel;
 
 import com.caminando.Caminando.businesslayer.services.dto.BaseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
-import com.caminando.Caminando.datalayer.entities.Image;
-import com.caminando.Caminando.datalayer.entities.travel.Comment;
-import com.caminando.Caminando.datalayer.entities.travel.Position;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -19,10 +14,12 @@ import java.util.List;
 @NoArgsConstructor
 @Builder(setterPrefix = "with")
 public class StepDTO extends BaseDTO {
+
     private String description;
     private Integer likes;
     private LocalDate arrivalDate;
     private LocalDate departureDate;
+    private Trip trip;
     private List<CommentDTO> comments;
     private List<ImageDTO> images;
 }

@@ -1,0 +1,88 @@
+package com.caminando.Caminando.presentationlayer.api.controller.travel;
+
+import com.caminando.Caminando.businesslayer.services.dto.travel.TripDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
+import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
+import com.caminando.Caminando.businesslayer.services.interfaces.travel.TripService;
+import com.caminando.Caminando.datalayer.entities.enums.Privacy;
+import com.caminando.Caminando.datalayer.entities.enums.Status;
+import com.caminando.Caminando.datalayer.entities.travel.Trip;
+import com.caminando.Caminando.datalayer.entities.travel.User;
+import com.caminando.Caminando.datalayer.repositories.UserRepository;
+import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
+import com.caminando.Caminando.presentationlayer.api.models.travel.TripModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+@RestController
+@RequestMapping("/api/trips")
+public class TripController {
+
+    @Autowired
+    private TripService tripService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    public Mapper<User, RegisteredUserDTO> mapUserEntity2RegisteredUser;
+
+    @PostMapping
+    public ResponseEntity<Trip> createTrip(@RequestBody @Validated TripModel model, BindingResult validator) {
+        if (validator.hasErrors()) {
+            throw new ApiValidationException(validator.getAllErrors());
+        }
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        RegisteredUserDTO userDTO = mapUserEntity2RegisteredUser.map(user);
+
+        var trip = tripService.save(TripDTO.builder()
+                .withTitle(model.title())
+                .withDescription(model.description())
+                .withEndDate(model.endDate())
+                .withEndDate(model.endDate())
+                .withStatus(Status.valueOf(model.status()))
+                .withPrivacy(Privacy.valueOf(model.privacy()))
+                .withUser(userDTO)
+                .build());
+        return new ResponseEntity<>(trip, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Trip> getTripById(@PathVariable Long id) {
+        var trip = tripService.getById(id);
+        return new ResponseEntity<>(trip, HttpStatus.FOUND);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Trip>> getAllTrips(Pageable pageable) {
+        var allTrip = tripService.getAll(pageable);
+        var headers = new HttpHeaders();
+        headers.add("Viaggi", String.valueOf(allTrip.getTotalElements()));
+        return new ResponseEntity<>(allTrip, headers, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Trip> updateTrip(@PathVariable Long id, @RequestBody Trip tripModified) {
+
+        var trip = tripService.update(id, tripModified);
+        return new ResponseEntity<>(trip, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Trip> deleteTrip(@PathVariable Long id) {
+        var trip = tripService.delete(id);
+        return new ResponseEntity<>(trip, HttpStatus.OK);
+    }
+
+}

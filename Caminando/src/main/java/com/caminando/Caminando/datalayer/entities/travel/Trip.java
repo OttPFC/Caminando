@@ -27,16 +27,16 @@ public class Trip extends BaseEntity {
 
     private Integer likes;
 
-    @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(nullable = false)
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Privacy privacy;
 
     @ManyToOne(fetch = FetchType.LAZY)

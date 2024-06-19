@@ -1,5 +1,4 @@
 package com.caminando.Caminando.businesslayer.services.dto;
-
 import lombok.*;
 
 @Data
@@ -10,4 +9,5 @@ import lombok.*;
 public class ImageDTO extends BaseDTO{
 
     private String imageURL;
+    private String description;
 }

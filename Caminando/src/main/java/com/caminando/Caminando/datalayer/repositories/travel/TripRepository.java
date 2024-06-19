@@ -1,4 +1,4 @@
-package com.caminando.Caminando.datalayer.repositories;
+package com.caminando.Caminando.datalayer.repositories.travel;
 
 import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
@@ -15,4 +15,5 @@ public interface TripRepository extends JpaRepository<Trip, Long>,
 
     Optional<Trip> findOneByTitle(String title);
     Optional<Trip> findById(Long id);
+    Optional<Trip> findByIdAndUserId(Long id, Long userId);
 }

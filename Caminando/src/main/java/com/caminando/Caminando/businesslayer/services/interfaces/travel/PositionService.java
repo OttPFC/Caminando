@@ -5,4 +5,7 @@ import com.caminando.Caminando.businesslayer.services.interfaces.generic.CRUDSer
 import com.caminando.Caminando.datalayer.entities.travel.Position;
 
 public interface PositionService extends CRUDService<Position, PositionDTO> {
+    PositionDTO getNomeLocalitaAndTimestampById(Long id);
+
+    PositionDTO mapEntityToDTO(Position position);
 }

@@ -1,5 +1,6 @@
 package com.caminando.Caminando.presentationlayer.api.models.travel;
 
+import com.caminando.Caminando.datalayer.entities.travel.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -18,5 +19,6 @@ public record TripModel(
         String status,
         @NotNull(message = "La privacy  non può essere nullo")
         String privacy
+
 ) {
 }

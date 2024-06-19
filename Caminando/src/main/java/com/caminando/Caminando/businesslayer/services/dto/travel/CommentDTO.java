@@ -1,9 +1,10 @@
 package com.caminando.Caminando.businesslayer.services.dto.travel;
 
+
 import com.caminando.Caminando.businesslayer.services.dto.BaseDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.datalayer.entities.travel.Step;
 import com.caminando.Caminando.datalayer.entities.travel.User;
-import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,6 +18,6 @@ public class CommentDTO extends BaseDTO {
 
     private String text;
     private LocalDate date;
-    private Step step;
-    private User user;
+    private StepDTO step;
+    private RegisteredUserDTO user;
 }

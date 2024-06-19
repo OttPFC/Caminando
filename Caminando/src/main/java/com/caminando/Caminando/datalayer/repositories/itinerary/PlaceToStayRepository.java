@@ -1,4 +1,4 @@
-package com.caminando.Caminando.datalayer.repositories;
+package com.caminando.Caminando.datalayer.repositories.itinerary;
 
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.PlaceToStay;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.ToDo;

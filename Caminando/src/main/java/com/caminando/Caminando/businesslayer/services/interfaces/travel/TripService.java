@@ -5,4 +5,7 @@ import com.caminando.Caminando.businesslayer.services.interfaces.generic.CRUDSer
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
 
 public interface TripService extends CRUDService<Trip, TripDTO> {
+    TripDTO mapEntityToDTO(Trip trip);
+
+    Trip getTripByIdAndUserId(Long tripId, Long userId);
 }

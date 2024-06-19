@@ -5,7 +5,7 @@ import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.CommentService;
 import com.caminando.Caminando.datalayer.entities.travel.Comment;
 import com.caminando.Caminando.datalayer.entities.travel.User;
-import com.caminando.Caminando.datalayer.repositories.CommentRepository;
+import com.caminando.Caminando.datalayer.repositories.travel.CommentRepository;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +27,11 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private UserRepository userRepository;
 
-//    @Autowired
-//    Mapper<Comment,CommentDTO> mapComment;
+    @Autowired
+    private Mapper<CommentDTO, Comment> commentDTOToEntityMapper;
+
+    @Autowired
+    private Mapper<Comment, CommentDTO> commentEntityToDTOMapper;
 
     @Override
     public Page<Comment> getAll(Pageable p) {
@@ -43,15 +46,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Comment save(CommentDTO commentDTO) {
-
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Comment comment = new Comment();
-        comment.setText(commentDTO.getText());
-        comment.setDate(commentDTO.getDate());
+        Comment comment = commentDTOToEntityMapper.map(commentDTO);
         comment.setUser(user);
-
         return commentRepository.save(comment);
     }
 
@@ -62,7 +61,6 @@ public class CommentServiceImpl implements CommentService {
             Comment comment = optionalComment.get();
             comment.setText(updatedComment.getText());
             comment.setDate(updatedComment.getDate());
-
             return commentRepository.save(comment);
         }
         return null;
@@ -77,5 +75,15 @@ public class CommentServiceImpl implements CommentService {
             return comment;
         }
         return null;
+    }
+
+    @Override
+    public Page<Comment> getCommentsByStepId(Long stepId, Pageable pageable) {
+        return commentRepository.findByStepId(stepId, pageable);
+    }
+
+    @Override
+    public CommentDTO mapEntityToDTO(Comment comment) {
+        return commentEntityToDTOMapper.map(comment);
     }
 }
