@@ -2,6 +2,7 @@ package com.caminando.Caminando.businesslayer.services.dto.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.BaseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
+
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import lombok.*;
 
@@ -22,7 +23,7 @@ public class SuggestItineraryDTO extends BaseDTO {
     private ImageDTO image;
     private List<ToDoDTO> toDo;
     private List<RestaurantDTO> restaurant;
-    private List<QuickFatcsDTO> quickFacts;
+    private List<QuickFactsDTO> quickFacts;
     private List<PlaceToStayDTO> placeToStay;
     private List<FoodDTO> food;
 }

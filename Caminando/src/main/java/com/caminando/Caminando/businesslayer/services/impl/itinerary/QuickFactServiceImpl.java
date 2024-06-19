@@ -1,6 +1,6 @@
 package com.caminando.Caminando.businesslayer.services.impl.itinerary;
 
-import com.caminando.Caminando.businesslayer.services.dto.itinerary.QuickFatcsDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.QuickFactsDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.QuickFactService;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.QuickFacts;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class QuickFactServiceImpl implements QuickFactService {
     }
 
     @Override
-    public QuickFacts save(QuickFatcsDTO e) {
+    public QuickFacts save(QuickFactsDTO e) {
         return null;
     }
 

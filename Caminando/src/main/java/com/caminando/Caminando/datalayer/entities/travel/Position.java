@@ -1,6 +1,7 @@
 package com.caminando.Caminando.datalayer.entities.travel;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,6 +11,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "position")
 @EqualsAndHashCode(callSuper = true)
+@Builder(setterPrefix = "with")
 public class Position extends BaseEntity {
 
     @Column(nullable = false)

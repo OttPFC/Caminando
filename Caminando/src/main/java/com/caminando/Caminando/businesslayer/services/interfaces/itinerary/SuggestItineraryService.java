@@ -5,4 +5,5 @@ import com.caminando.Caminando.businesslayer.services.interfaces.generic.CRUDSer
 import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
 
 public interface SuggestItineraryService extends CRUDService<SuggestItinerary, SuggestItineraryDTO> {
+    
 }

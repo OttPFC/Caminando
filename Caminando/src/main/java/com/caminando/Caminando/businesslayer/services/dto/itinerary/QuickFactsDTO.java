@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(setterPrefix = "with")
-public class QuickFatcsDTO extends BaseDTO {
+public class QuickFactsDTO extends BaseDTO {
     private String title;
     private String description;
     private ImageDTO image;
