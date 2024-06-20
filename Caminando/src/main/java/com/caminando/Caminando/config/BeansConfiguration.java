@@ -233,6 +233,68 @@ public class BeansConfiguration {
 				.withFood(input.getFood().stream().map(this::toFoodDTO).collect(Collectors.toList()))
 				.build();
 	}
+
+	@Bean
+	@Scope("singleton")
+	public Mapper<ToDoDTO, ToDo> mapToDoDTOToEntity(){
+		return (input) -> {
+			ToDo toDo = new ToDo();
+            toDo.setDescription(input.getDescription());
+            toDo.setTitle(input.getTitle());
+			toDo.setImage(toImageEntity(input.getImage()));
+			toDo.setSuggestItinerary(toSuggestItineraryEntity(input.getSuggestItinerary()));
+            return toDo;
+		};
+	}
+	@Bean
+	@Scope("singleton")
+	public Mapper<RestaurantDTO, Restaurant> mapRestaurantDTOToEntity(){
+		return (input) -> {
+			Restaurant restaurant = new Restaurant();
+			restaurant.setDescription(input.getDescription());
+			restaurant.setTitle(input.getTitle());
+			restaurant.setImage(toImageEntity(input.getImage()));
+			restaurant.setSuggestItinerary(toSuggestItineraryEntity(input.getSuggestItinerary()));
+            return restaurant;
+		};
+	}
+	@Bean
+	@Scope("singleton")
+	public Mapper<QuickFactsDTO, QuickFacts> mapQuickFactsDTOToEntity(){
+		return (input) -> {
+			QuickFacts q = new QuickFacts();
+			q.setDescription(input.getDescription());
+			q.setTitle(input.getTitle());
+			q.setImage(toImageEntity(input.getImage()));
+			q.setSuggestItinerary(toSuggestItineraryEntity(input.getSuggestItinerary()));
+            return q;
+		};
+	}
+	@Bean
+	@Scope("singleton")
+	public Mapper<PlaceToStayDTO, PlaceToStay> mapPlaceToStayDTOToEntity(){
+		return (input) -> {
+			PlaceToStay p = new PlaceToStay();
+			p.setDescription(input.getDescription());
+			p.setTitle(input.getTitle());
+			p.setImage(toImageEntity(input.getImage()));
+			p.setSuggestItinerary(toSuggestItineraryEntity(input.getSuggestItinerary()));
+            return p;
+		};
+	}
+	@Bean
+	@Scope("singleton")
+	public Mapper<FoodDTO, Food> mapFoodDTOToEntity(){
+		return (input) -> {
+			Food f = new Food();
+			f.setDescription(input.getDescription());
+			f.setTitle(input.getTitle());
+			f.setImage(toImageEntity(input.getImage()));
+			f.setSuggestItinerary(toSuggestItineraryEntity(input.getSuggestItinerary()));
+            return f;
+		};
+	}
+
 	private RegisteredUserDTO toRegisteredUserDTO(User user) {
 		return RegisteredUserDTO.builder()
 				.withId(user.getId())
