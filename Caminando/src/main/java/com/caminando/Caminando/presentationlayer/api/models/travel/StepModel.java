@@ -10,9 +10,6 @@ public record StepModel(
         @NotNull(message = "La descrizione non può essere nulla")
         String description,
 
-        @NotNull(message = "I likes non possono essere nulli")
-        Integer likes,
-
         @NotNull(message = "La data di arrivo non può essere nulla")
         LocalDate arrivalDate,
 

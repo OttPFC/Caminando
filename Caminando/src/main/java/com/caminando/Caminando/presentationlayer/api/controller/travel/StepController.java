@@ -51,7 +51,6 @@ public class StepController {
         }
         var step = stepService.save(StepDTO.builder()
                 .withDescription(model.description())
-                        .withLikes(model.likes())
                         .withArrivalDate(model.arrivalDate())
                 .withDepartureDate(model.departureDate())
                         .withTrip(trip)
