@@ -69,4 +69,6 @@ public class User extends BaseEntity {
     )
     private List<RoleEntity> roles = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Position> positions = new ArrayList<>();
 }

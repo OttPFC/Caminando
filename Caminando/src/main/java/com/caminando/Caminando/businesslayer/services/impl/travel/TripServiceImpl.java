@@ -1,12 +1,16 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
 import com.caminando.Caminando.businesslayer.services.dto.travel.TripDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.TripService;
+import com.caminando.Caminando.datalayer.entities.enums.Privacy;
+import com.caminando.Caminando.datalayer.entities.enums.Status;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.travel.TripRepository;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
+import com.caminando.Caminando.presentationlayer.api.models.travel.TripModel;
 import com.caminando.Caminando.presentationlayer.utility.EntityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,8 @@ public class TripServiceImpl implements TripService {
     @Autowired
     private Mapper<Trip, TripDTO> tripEntityToDTOMapper;
 
+    @Autowired
+    private Mapper<User, RegisteredUserDTO> userEntityToUserDTOMapper;
     @Autowired
     EntityUtils utils;
 
@@ -94,4 +100,28 @@ public class TripServiceImpl implements TripService {
     public Trip getTripByIdAndUserId(Long tripId, Long userId) {
         return tripRepository.findByIdAndUserId(tripId, userId).orElse(null);
     }
+
+    @Override
+    @Transactional
+    public Trip createTrip(TripModel model) {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        RegisteredUserDTO userDTO = userEntityToUserDTOMapper.map(user);
+
+        TripDTO tripDTO = TripDTO.builder()
+                .withTitle(model.title())
+                .withDescription(model.description())
+                .withStartDate(model.startDate())
+                .withEndDate(model.endDate())
+                .withStatus(Status.valueOf(model.status()))
+                .withPrivacy(Privacy.valueOf(model.privacy()))
+                .withUser(userDTO)
+                .build();
+
+        Trip trip = tripDTOToEntityMapper.map(tripDTO);
+        trip.setUser(user);
+
+        return tripRepository.save(trip);
+    }
+
 }

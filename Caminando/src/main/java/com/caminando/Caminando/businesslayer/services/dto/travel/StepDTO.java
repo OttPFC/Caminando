@@ -19,7 +19,8 @@ public class StepDTO extends BaseDTO {
     private Integer likes;
     private LocalDate arrivalDate;
     private LocalDate departureDate;
-    private Trip trip;
+    private TripDTO trip;
     private List<CommentDTO> comments;
     private List<ImageDTO> images;
+    private PositionDTO position;
 }

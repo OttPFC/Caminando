@@ -42,20 +42,12 @@ public class TripController {
         if (validator.hasErrors()) {
             throw new ApiValidationException(validator.getAllErrors());
         }
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        RegisteredUserDTO userDTO = mapUserEntity2RegisteredUser.map(user);
-
-        var trip = tripService.save(TripDTO.builder()
-                .withTitle(model.title())
-                .withDescription(model.description())
-                .withEndDate(model.endDate())
-                .withEndDate(model.endDate())
-                .withStatus(Status.valueOf(model.status()))
-                .withPrivacy(Privacy.valueOf(model.privacy()))
-                .withUser(userDTO)
-                .build());
-        return new ResponseEntity<>(trip, HttpStatus.CREATED);
+        try {
+            Trip trip = tripService.createTrip(model);
+            return new ResponseEntity<>(trip, HttpStatus.CREATED);
+        } catch (RuntimeException ex) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/{id}")

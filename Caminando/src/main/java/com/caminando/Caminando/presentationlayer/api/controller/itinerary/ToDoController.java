@@ -1,10 +1,16 @@
 package com.caminando.Caminando.presentationlayer.api.controller.itinerary;
 
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.SuggestItineraryDTO;
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.ToDoDTO;
+import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
+import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.SuggestItineraryService;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.ToDoService;
+import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.ToDo;
+import com.caminando.Caminando.datalayer.entities.travel.Step;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
 import com.caminando.Caminando.presentationlayer.api.models.itinerary.GenericModel;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,19 +28,26 @@ public class ToDoController {
     @Autowired
     private ToDoService service;
 
+    @Autowired
+    private SuggestItineraryService itService;
 
+    @Autowired
+    Mapper<SuggestItinerary, SuggestItineraryDTO> itMapper;
 
-    @PostMapping
-    public ResponseEntity<ToDo> createToDO(@RequestBody @Validated GenericModel model, BindingResult validator){
+    @PostMapping("/api/{itineraryId}")
+    public ResponseEntity<?> createToDO(@PathVariable Long itineraryId ,@RequestBody @Validated GenericModel model, BindingResult validator){
         if (validator.hasErrors()) {
-            throw new ApiValidationException(validator.getAllErrors());
+            return ResponseEntity.badRequest().body(validator.getAllErrors());
         }
-        var toDo = service.save(ToDoDTO.builder()
-                        .withTitle(model.title())
-                        .withDescription(model.description())
 
-                .build());
-        return new ResponseEntity<>(toDo, HttpStatus.CREATED);
+        try {
+            ToDo createdToDo = service.saveToDo(itineraryId,model);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdToDo);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")

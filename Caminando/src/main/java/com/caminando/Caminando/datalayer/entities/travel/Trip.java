@@ -49,4 +49,9 @@ public class Trip extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_image_id")
     private Image coverImage;
+
+    public void addStep(Step step) {
+        this.steps.add(step);
+        step.setTrip(this);
+    }
 }

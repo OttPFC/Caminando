@@ -5,9 +5,11 @@ import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.CommentService;
 import com.caminando.Caminando.datalayer.entities.travel.Comment;
+import com.caminando.Caminando.datalayer.entities.travel.Position;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.api.models.travel.CommentModel;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,23 +33,19 @@ public class CommentController {
     @Autowired
     public Mapper<User, RegisteredUserDTO> mapUserEntity2RegisteredUser;
 
-    @PostMapping
-    public ResponseEntity<CommentDTO> createComment(@RequestBody @Validated CommentModel commentModel, BindingResult validator) {
+    @PostMapping("/step/{stepId}")
+    public ResponseEntity<?> createComment(@PathVariable Long stepId, @RequestBody @Validated CommentModel model, BindingResult validator) {
         if (validator.hasErrors()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(validator.getAllErrors());
         }
-
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        RegisteredUserDTO userDTO = mapUserEntity2RegisteredUser.map(user);
-        CommentDTO commentDTO = CommentDTO.builder()
-                .withText(commentModel.text())
-                .withUser(userDTO)
-                .build();
-
-        Comment savedComment = commentService.save(commentDTO);
-        CommentDTO comment = commentService.mapEntityToDTO(savedComment);
-        return new ResponseEntity<>(comment, HttpStatus.CREATED);
+        try {
+            Comment createdComment = commentService.saveComment(stepId,model);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")

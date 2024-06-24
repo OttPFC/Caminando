@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface TripRepository extends JpaRepository<Trip, Long>,
                                         PagingAndSortingRepository<Trip, Long> {
 
+    Optional<Trip> getTripByIdAndUserId(Long tripId, Long userId);
     Optional<Trip> findOneByTitle(String title);
     Optional<Trip> findById(Long id);
     Optional<Trip> findByIdAndUserId(Long id, Long userId);

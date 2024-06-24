@@ -5,10 +5,12 @@ import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.SuggestItineraryService;
 import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
+import com.caminando.Caminando.datalayer.entities.travel.Comment;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
 import com.caminando.Caminando.presentationlayer.api.models.itinerary.SuggestItineraryModel;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,22 +34,18 @@ public class SuggestItineraryController {
     public Mapper<User, RegisteredUserDTO> mapUserEntity2RegisteredUser;
 
     @PostMapping
-    public ResponseEntity<SuggestItinerary> createItinerary(@RequestBody @Validated SuggestItineraryModel model, BindingResult validator){
+    public ResponseEntity<?> createItinerary(@RequestBody @Validated SuggestItineraryModel model, BindingResult validator){
         if (validator.hasErrors()) {
-            throw new ApiValidationException(validator.getAllErrors());
+            return ResponseEntity.badRequest().body(validator.getAllErrors());
         }
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        RegisteredUserDTO userDTO = mapUserEntity2RegisteredUser.map(user);
-
-        var itinerary = itService.save(SuggestItineraryDTO.builder()
-                .withName(model.name())
-                .withDescription(model.description())
-                .withLocation(model.location())
-                .withUser(userDTO)
-                .build());
-
-        return new ResponseEntity<>(itinerary, HttpStatus.CREATED);
+        try {
+            SuggestItinerary createdItinerary = itService.saveItinerary(model);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdItinerary);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")

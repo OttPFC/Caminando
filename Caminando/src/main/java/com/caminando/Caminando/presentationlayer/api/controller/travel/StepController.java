@@ -9,6 +9,7 @@ import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
 import com.caminando.Caminando.presentationlayer.api.models.travel.StepModel;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/api/steps")
 public class StepController {
+
     @Autowired
     private StepService stepService;
 
@@ -34,30 +36,20 @@ public class StepController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping
-    public ResponseEntity<Step> createStep(@PathVariable Long tripId,@RequestBody @Validated StepModel model, BindingResult validator) {
+    @PostMapping("/trip/{tripId}/position/{positionId}")
+    public ResponseEntity<?> createStep(@PathVariable Long tripId, @PathVariable Long positionId, @RequestBody @Validated StepModel model, BindingResult validator) {
         if (validator.hasErrors()) {
-            throw new ApiValidationException(validator.getAllErrors());
+            return ResponseEntity.badRequest().body(validator.getAllErrors());
         }
 
-        // Recupera l'utente autenticato
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Recupera il trip associato all'utente in base al tripId nel StepModel
-        Trip trip = tripService.getTripByIdAndUserId(tripId, user.getId());
-        if (trip == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Step createdStep = stepService.createStep(model, tripId, positionId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdStep);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
-        var step = stepService.save(StepDTO.builder()
-                .withDescription(model.description())
-                        .withArrivalDate(model.arrivalDate())
-                .withDepartureDate(model.departureDate())
-                        .withTrip(trip)
-                        .withComments(new ArrayList<>())
-                        .withImages(new ArrayList<>())
-                .build());
-        return new ResponseEntity<>(step, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")

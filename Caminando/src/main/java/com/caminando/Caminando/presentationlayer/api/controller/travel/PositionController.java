@@ -3,11 +3,17 @@ package com.caminando.Caminando.presentationlayer.api.controller.travel;
 import com.caminando.Caminando.businesslayer.services.dto.travel.PositionDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.PositionService;
 import com.caminando.Caminando.datalayer.entities.travel.Position;
+import com.caminando.Caminando.datalayer.entities.travel.Step;
+import com.caminando.Caminando.presentationlayer.api.models.travel.PositionModel;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -19,12 +25,20 @@ public class PositionController {
     @Autowired
     private PositionService positionService;
 
-    @PostMapping
-    public ResponseEntity<PositionDTO> savePosition(@RequestBody PositionDTO positionDTO) {
-        positionDTO.setTimestamp(Instant.now());
-        Position savedPosition = positionService.save(positionDTO);
-        PositionDTO position = positionService.mapEntityToDTO(savedPosition);
-        return new ResponseEntity<>(position, HttpStatus.CREATED);
+    @PostMapping("/step/{stepId}")
+    public ResponseEntity<?> savePosition(@PathVariable Long stepId, @RequestBody @Validated PositionModel model, BindingResult validator ) {
+        if (validator.hasErrors()) {
+            return ResponseEntity.badRequest().body(validator.getAllErrors());
+        }
+        try {
+            Position createdPosition = positionService.save(model);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdPosition);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
     }
 
     @GetMapping("/{id}/info")

@@ -1,10 +1,16 @@
 package com.caminando.Caminando.businesslayer.services.impl.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.FoodDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.PlaceToStayDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.SuggestItineraryDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.FoodService;
+import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.Food;
+import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.PlaceToStay;
 import com.caminando.Caminando.datalayer.repositories.itinerary.FoodRepository;
+import com.caminando.Caminando.datalayer.repositories.itinerary.SuggestItineraryRepository;
+import com.caminando.Caminando.presentationlayer.api.models.itinerary.GenericModel;
 import com.caminando.Caminando.presentationlayer.utility.EntityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +26,11 @@ public class FoodServiceImpl implements FoodService {
 
     @Autowired
     FoodRepository foodRepository;
+    @Autowired
+    private SuggestItineraryRepository itRepo;
 
+    @Autowired
+    private Mapper<SuggestItinerary, SuggestItineraryDTO> itineraryToDTO;
     @Autowired
     Mapper<FoodDTO, Food> foodMapper;
 
@@ -60,5 +70,23 @@ public class FoodServiceImpl implements FoodService {
             return entity;
         }
         return null;
+    }
+
+    @Override
+    public Food saveFood(Long itineraryId, GenericModel model) {
+
+        SuggestItinerary itinerary = itRepo.findById(itineraryId).orElse(null);
+
+        SuggestItineraryDTO dto = itineraryToDTO.map(itinerary);
+
+        FoodDTO foodDto = FoodDTO.builder()
+                .withTitle(model.title())
+                .withDescription(model.description())
+                .withSuggestItinerary(dto)
+                .build();
+
+        Food newFood = foodRepository.save(foodMapper.map(foodDto));
+        itinerary.getFood().add(newFood);
+        return newFood;
     }
 }

@@ -3,8 +3,10 @@ package com.caminando.Caminando.presentationlayer.api.controller.itinerary;
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.PlaceToStayDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.PlaceToStayService;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.PlaceToStay;
+import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.QuickFacts;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
 import com.caminando.Caminando.presentationlayer.api.models.itinerary.GenericModel;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,17 +25,19 @@ public class PlaceToStayController {
 
 
 
-    @PostMapping
-    public ResponseEntity<PlaceToStay> createPlaceToStay(@RequestBody @Validated GenericModel model, BindingResult validator){
+    @PostMapping("/api/{itineraryId}")
+    public ResponseEntity<?> createPlaceToStay(@PathVariable Long itineraryId ,@RequestBody @Validated GenericModel model, BindingResult validator){
         if (validator.hasErrors()) {
-            throw new ApiValidationException(validator.getAllErrors());
+            return ResponseEntity.badRequest().body(validator.getAllErrors());
         }
-        var placeToStay = service.save(PlaceToStayDTO.builder()
-                .withTitle(model.title())
-                .withDescription(model.description())
-
-                .build());
-        return new ResponseEntity<>(placeToStay, HttpStatus.CREATED);
+        try {
+            PlaceToStay createdPlaceToStay = service.savePlaceToStay(itineraryId,model);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdPlaceToStay);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")

@@ -42,4 +42,6 @@ public class Step extends BaseEntity {
 
     @OneToOne(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Position position;
+
+
 }

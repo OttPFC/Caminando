@@ -1,10 +1,16 @@
 package com.caminando.Caminando.businesslayer.services.impl.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.RestaurantDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.SuggestItineraryDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.ToDoDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.RestaurantService;
+import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.Restaurant;
+import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.ToDo;
 import com.caminando.Caminando.datalayer.repositories.itinerary.RestaurantRepository;
+import com.caminando.Caminando.datalayer.repositories.itinerary.SuggestItineraryRepository;
+import com.caminando.Caminando.presentationlayer.api.models.itinerary.GenericModel;
 import com.caminando.Caminando.presentationlayer.utility.EntityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +27,11 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     RestaurantRepository repo;
+    @Autowired
+    private SuggestItineraryRepository itRepo;
 
+    @Autowired
+    private Mapper<SuggestItinerary, SuggestItineraryDTO> itineraryToDTO;
     @Autowired
     Mapper<RestaurantDTO,Restaurant> mapper;
 
@@ -60,5 +70,25 @@ public class RestaurantServiceImpl implements RestaurantService {
             return entity;
         }
         return null;
+    }
+
+
+
+    @Override
+    public Restaurant saveRestaurant(Long itineraryId, GenericModel model) {
+
+        SuggestItinerary itinerary = itRepo.findById(itineraryId).orElse(null);
+
+        SuggestItineraryDTO dto = itineraryToDTO.map(itinerary);
+
+        RestaurantDTO restaurantDto = RestaurantDTO.builder()
+                .withTitle(model.title())
+                .withDescription(model.description())
+                .withSuggestItinerary(dto)
+                .build();
+
+        Restaurant newRestaurant = repo.save(mapper.map(restaurantDto));
+        itinerary.getRestaurant().add(newRestaurant);
+        return newRestaurant;
     }
 }

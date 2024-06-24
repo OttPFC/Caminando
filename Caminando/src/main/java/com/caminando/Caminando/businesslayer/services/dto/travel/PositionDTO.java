@@ -2,6 +2,7 @@ package com.caminando.Caminando.businesslayer.services.dto.travel;
 
 
 import com.caminando.Caminando.businesslayer.services.dto.BaseDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import lombok.*;
 
 import java.time.Instant;
@@ -17,5 +18,7 @@ public class PositionDTO extends BaseDTO {
     private double longitude;
     private Instant timestamp;
     private String nomeLocalita;
+    private StepDTO step;
+    private RegisteredUserDTO user;
 
 }

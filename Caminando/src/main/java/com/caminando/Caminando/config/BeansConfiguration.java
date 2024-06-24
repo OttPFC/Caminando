@@ -23,11 +23,10 @@ public class BeansConfiguration {
 
 	@Bean
 	public Pageable defaultPageable() {
-		int page = 0; // Numero di pagina predefinito (prima pagina)
-		int size = 10; // Dimensione della pagina predefinita
-		return PageRequest.of(page, size);
+		return PageRequest.of(0, 10);
 	}
 
+	// User mapper
 	@Bean
 	@Scope("singleton")
 	public Mapper<RegisterUserDTO, User> mapRegisterUser2UserEntity() {
@@ -66,6 +65,11 @@ public class BeansConfiguration {
 				.build();
 	}
 
+	// User mapper
+
+
+
+	// Position mapper
 	@Bean
 	@Scope("singleton")
 	public Mapper<PositionDTO, Position> mapPositionDTOToEntity() {
@@ -74,6 +78,7 @@ public class BeansConfiguration {
 				.withLongitude(input.getLongitude())
 				.withTimestamp(input.getTimestamp())
 				.withNomeLocalita(input.getNomeLocalita())
+				.withStep(toStepEntity(input.getStep()))
 				.build();
 	}
 
@@ -88,6 +93,11 @@ public class BeansConfiguration {
 				.build();
 	}
 
+
+	// Position mapper
+	//********************************************************************************
+
+	//Trip Mapper
 	@Bean
 	@Scope("singleton")
 	public Mapper<TripDTO, Trip> mapTripDTOToEntity() {
@@ -106,22 +116,6 @@ public class BeansConfiguration {
 			return trip;
 		};
 	}
-//	@Bean
-//	@Scope("singleton")
-//	public Mapper<TripDTO, Trip> mapTripDTOToEntity() {
-//		return (input) -> Trip.builder()
-//				.withTitle(input.getTitle())
-//				.withDescription(input.getDescription())
-//				.withLikes(input.getLikes())
-//				.withStartDate(input.getStartDate())
-//				.withEndDate(input.getEndDate())
-//				.withStatus(input.getStatus())
-//				.withPrivacy(input.getPrivacy())
-//				.withUser(input.getUser)
-//				.withSteps(input.getSteps().stream().map(this::toStepEntity).collect(Collectors.toList()))
-//				.withCoverImage(input.getCoverImage())
-//				.build();
-//	}
 
 	@Bean
 	@Scope("singleton")
@@ -140,6 +134,9 @@ public class BeansConfiguration {
 				.build();
 	}
 
+	//********************************************************************************
+
+	//Comment Mapper
 	@Bean
 	@Scope("singleton")
 	public Mapper<CommentDTO, Comment> mapCommentDTOToEntity() {
@@ -164,6 +161,10 @@ public class BeansConfiguration {
 				.build();
 	}
 
+	//********************************************************************************
+
+
+	//Step Mapper
 	@Bean
 	@Scope("singleton")
 	public Mapper<StepDTO, Step> mapStepDTOToEntity() {
@@ -173,7 +174,7 @@ public class BeansConfiguration {
 			step.setLikes(input.getLikes());
 			step.setArrivalDate(input.getArrivalDate());
 			step.setDepartureDate(input.getDepartureDate());
-//			step.setTrip(toTripEntity(input.getTrip()));
+			step.setTrip(toTripEntity(input.getTrip()));
 			step.setComments(input.getComments().stream().map(this::toCommentEntity).collect(Collectors.toList()));
 			step.setImages(input.getImages().stream().map(this::toImageEntity).collect(Collectors.toList()));
 			return step;
@@ -188,11 +189,16 @@ public class BeansConfiguration {
 				.withLikes(input.getLikes())
 				.withArrivalDate(input.getArrivalDate())
 				.withDepartureDate(input.getDepartureDate())
-//				.withTrip(toTripDTO(input.getTrip()))
+				.withTrip(toTripDTO(input.getTrip()))
 				.withComments(input.getComments().stream().map(this::toCommentDTO).collect(Collectors.toList()))
 				.withImages(input.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()))
 				.build();
 	}
+
+	//********************************************************************************
+
+
+	//Itinerary Mapper
 	@Bean
 	@Scope("singleton")
 	public Mapper<SuggestItineraryDTO, SuggestItinerary> mapSuggestItineraryDTOToEntity() {
@@ -234,6 +240,7 @@ public class BeansConfiguration {
 				.build();
 	}
 
+	//********************************************************************************
 	@Bean
 	@Scope("singleton")
 	public Mapper<ToDoDTO, ToDo> mapToDoDTOToEntity(){
@@ -295,6 +302,7 @@ public class BeansConfiguration {
 		};
 	}
 
+	//********************************************************************************
 	private RegisteredUserDTO toRegisteredUserDTO(User user) {
 		return RegisteredUserDTO.builder()
 				.withId(user.getId())
@@ -322,7 +330,7 @@ public class BeansConfiguration {
 				.withLikes(step.getLikes())
 				.withArrivalDate(step.getArrivalDate())
 				.withDepartureDate(step.getDepartureDate())
-//				.withTrip(step.getTrip() != null ? toTripDTO(step.getTrip()) : null)
+				.withTrip(step.getTrip() != null ? toTripDTO(step.getTrip()) : null)
 				.withComments(step.getComments().stream().map(this::toCommentDTO).collect(Collectors.toList()))
 				.withImages(step.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()))
 				.build();
@@ -334,12 +342,30 @@ public class BeansConfiguration {
 		step.setLikes(stepDTO.getLikes());
 		step.setArrivalDate(stepDTO.getArrivalDate());
 		step.setDepartureDate(stepDTO.getDepartureDate());
-//		step.setTrip(stepDTO.getTrip() != null ? toTripEntity(stepDTO.getTrip()) : null);
+		step.setTrip(stepDTO.getTrip() != null ? toTripEntity(stepDTO.getTrip()) : null);
 		step.setComments(stepDTO.getComments().stream().map(this::toCommentEntity).collect(Collectors.toList()));
 		step.setImages(stepDTO.getImages().stream().map(this::toImageEntity).collect(Collectors.toList()));
 		return step;
 	}
 
+	private Position toPositionEntity(PositionDTO positionDTO){
+		Position position = new Position();
+        position.setLatitude(positionDTO.getLatitude());
+        position.setLongitude(positionDTO.getLongitude());
+		position.setTimestamp(positionDTO.getTimestamp());
+		position.setNomeLocalita(positionDTO.getNomeLocalita());
+		position.setStep(positionDTO.getStep() != null ? toStepEntity(positionDTO.getStep()) : null);
+        return position;
+	}
+	private PositionDTO toPositionDTO(Position position){
+		return PositionDTO.builder()
+				.withLatitude(position.getLatitude())
+				.withLongitude(position.getLongitude())
+				.withTimestamp(position.getTimestamp())
+				.withNomeLocalita(position.getNomeLocalita())
+				.withStep(position.getStep() != null ? toStepDTO(position.getStep()) : null)
+				.build();
+	}
 	private CommentDTO toCommentDTO(Comment comment) {
 		return CommentDTO.builder()
 				.withText(comment.getText())
