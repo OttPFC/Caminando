@@ -25,7 +25,11 @@ public class ToDoServiceImpl implements ToDoService {
 
     @Autowired
     ToDoRepository toDoRepository;
+    @Autowired
+    private SuggestItineraryRepository itRepo;
 
+    @Autowired
+    private Mapper<SuggestItinerary, SuggestItineraryDTO> itineraryToDTO;
     @Autowired
     Mapper<ToDoDTO,ToDo> toDoMapper;
 
@@ -65,11 +69,7 @@ public class ToDoServiceImpl implements ToDoService {
         return null;
     }
 
-    @Autowired
-    private SuggestItineraryRepository itRepo;
 
-    @Autowired
-    private Mapper<SuggestItinerary, SuggestItineraryDTO> itineraryToDTO;
 
     @Override
     public ToDo saveToDo(Long itineraryId, GenericModel model) {

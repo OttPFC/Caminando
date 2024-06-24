@@ -75,7 +75,7 @@ public class CommentServiceImpl implements CommentService {
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
             comment.setText(updatedComment.getText());
-            comment.setDate(updatedComment.getDate());
+            comment.setDate(LocalDate.now());
             return commentRepository.save(comment);
         }
         return null;

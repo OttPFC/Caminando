@@ -43,6 +43,9 @@ public class StepServiceImpl implements StepService {
 
     @Autowired
     PositionRepository positionRepository;
+
+    @Autowired
+    Mapper<Position, PositionDTO> positionToDTO;
     @Autowired
     private Mapper<StepDTO, Step> stepDTOToEntityMapper;
 
@@ -104,8 +107,7 @@ public class StepServiceImpl implements StepService {
         return null;
     }
 
-    @Autowired
-    Mapper<Position, PositionDTO> positionToDTO;
+
     @Override
     @Transactional
     public Step createStep(StepModel model, Long tripId, Long positionId) {
