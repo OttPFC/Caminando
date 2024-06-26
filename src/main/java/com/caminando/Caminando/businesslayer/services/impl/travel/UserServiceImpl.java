@@ -118,21 +118,20 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Optional<LoginResponseDTO> login(String username, String password) {
+    public Optional<LoginResponseDTO> login(String email, String password) {
         try {
-            var a = auth.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-            a.getAuthorities();
+            var a = auth.authenticate(new UsernamePasswordAuthenticationToken(email, password));
             SecurityContextHolder.getContext().setAuthentication(a);
 
-            var dto = mapLogin.map(usersRepository.findOneByUsername(username).orElseThrow());
+            var dto = mapLogin.map(usersRepository.findByEmail(email).orElse(null));
             dto.setToken(jwt.generateToken(a));
             return Optional.of(dto);
         } catch (NoSuchElementException e) {
             log.error("User not found", e);
-            throw new InvalidLoginException(username, password);
+            throw new InvalidLoginException(email, password);
         } catch (AuthenticationException e) {
             log.error("Authentication failed", e);
-            throw new InvalidLoginException(username, password);
+            throw new InvalidLoginException(email, password);
         }
     }
 

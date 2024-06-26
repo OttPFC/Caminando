@@ -8,9 +8,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Caminando (1)" />
-        <module name="Caminando" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Caminando" target="22" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

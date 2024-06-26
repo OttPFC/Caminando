@@ -71,7 +71,7 @@ public class UserController {
         if (validator.hasErrors()) {
             throw new ApiValidationException(validator.getAllErrors());
         }
-        return userService.login(model.username(), model.password())
+        return userService.login(model.email(), model.password())
                 .map(response -> new ResponseEntity<>(response, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
     }
