@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
             SecurityContextHolder.getContext().setAuthentication(a);
 
             var dto = mapLogin.map(usersRepository.findByEmail(email).orElse(null));
-            dto.setToken(jwt.generateToken(a));
+            dto.setAccessToken(jwt.generateToken(a));
             return Optional.of(dto);
         } catch (NoSuchElementException e) {
             log.error("User not found", e);

@@ -56,12 +56,19 @@ public class BeansConfiguration {
 	@Scope("singleton")
 	public Mapper<User, LoginResponseDTO> mapUserEntity2LoginResponse() {
 		return (input) -> LoginResponseDTO.builder()
-				.withId(input.getId())
-				.withFirstName(input.getFirstName())
-				.withLastName(input.getLastName())
-				.withUsername(input.getUsername())
-				.withEmail(input.getEmail())
-				.withRoles(input.getRoles())
+				.withUser(RegisteredUserDTO.builder()
+						.withId(input.getId())
+						.withFirstName(input.getFirstName())
+						.withLastName(input.getLastName())
+						.withUsername(input.getUsername())
+						.withEmail(input.getEmail())
+						.withRoles(input.getRoles())
+						.withEnabled(input.isEnabled())
+
+
+						.build())
+
+
 				.build();
 	}
 

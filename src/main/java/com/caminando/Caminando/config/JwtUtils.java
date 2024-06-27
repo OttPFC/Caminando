@@ -38,6 +38,7 @@ public class JwtUtils {
 
 	public boolean isTokenValid(String token) {
 		try {
+			token = token.trim();
 			Jwts.parser()
 					.setSigningKey(getSigningKey())
 					.requireIssuer("MySpringApplication")
@@ -50,6 +51,7 @@ public class JwtUtils {
 	}
 
 	public String getUsernameFromToken(String token) {
+		token = token.trim();
 		return Jwts.parser()
 				.setSigningKey(getSigningKey())
 				.build()
@@ -58,3 +60,4 @@ public class JwtUtils {
 				.getSubject();
 	}
 }
+
