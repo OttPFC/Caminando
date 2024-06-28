@@ -14,6 +14,7 @@ public record RegisterUserModel(
         String username,
         @Email(message = "Inserisci una email valida")
         String email,
+        String city,
         @NotBlank(message = "La password non può contenere solo spazi vuoti")
         @Size(max = 125, message ="La password può contenere un max 25 caratteri")
         String password

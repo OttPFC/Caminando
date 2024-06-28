@@ -15,5 +15,6 @@ public class RegisterUserDTO extends BaseDTO {
     String lastName;
     String username;
     String email;
+    String city;
     String password;
 }

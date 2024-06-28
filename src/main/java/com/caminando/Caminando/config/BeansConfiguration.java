@@ -50,6 +50,7 @@ public class BeansConfiguration {
 				.withCity(input.getCity())
 				.withEmail(input.getEmail())
 				.withRoles(input.getRoles())
+				.withEnabled(input.isEnabled())
 				.build();
 	}
 

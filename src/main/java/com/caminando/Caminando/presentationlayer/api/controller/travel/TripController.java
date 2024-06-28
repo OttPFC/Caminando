@@ -1,26 +1,16 @@
 package com.caminando.Caminando.presentationlayer.api.controller.travel;
 
-import com.caminando.Caminando.businesslayer.services.dto.travel.TripDTO;
-import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
-import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.TripService;
-import com.caminando.Caminando.datalayer.entities.enums.Privacy;
-import com.caminando.Caminando.datalayer.entities.enums.Status;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
-import com.caminando.Caminando.datalayer.entities.travel.User;
-import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
 import com.caminando.Caminando.presentationlayer.api.models.travel.TripModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -31,20 +21,14 @@ public class TripController {
     @Autowired
     private TripService tripService;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    public Mapper<User, RegisteredUserDTO> mapUserEntity2RegisteredUser;
-
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<Trip> createTrip(@RequestBody @Validated TripModel model, BindingResult validator) {
         if (validator.hasErrors()) {
             throw new ApiValidationException(validator.getAllErrors());
         }
         try {
             Trip trip = tripService.createTrip(model);
-            return new ResponseEntity<>(trip, HttpStatus.CREATED);
+            return new ResponseEntity<>(trip, HttpStatus.OK);
         } catch (RuntimeException ex) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }

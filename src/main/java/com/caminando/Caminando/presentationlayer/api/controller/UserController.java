@@ -6,6 +6,7 @@ import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.UserService;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
+import com.caminando.Caminando.presentationlayer.api.exceptions.DisabledUserException;
 import com.caminando.Caminando.presentationlayer.api.exceptions.NotFoundException;
 import com.caminando.Caminando.presentationlayer.api.models.user.LoginModel;
 import com.caminando.Caminando.presentationlayer.api.models.user.RegisterUserModel;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/user")
@@ -63,6 +65,7 @@ public class UserController {
                         .withLastName(model.lastName())
                         .withUsername(model.username())
                         .withEmail(model.email())
+                        .withCity(model.city())
                         .withPassword(model.password())
                         .build());
 
@@ -74,10 +77,23 @@ public class UserController {
         if (validator.hasErrors()) {
             throw new ApiValidationException(validator.getAllErrors());
         }
-        return userService.login(model.email(), model.password())
-                .map(response -> new ResponseEntity<>(response, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+
+        Optional<LoginResponseDTO> loginResponse = userService.login(model.username(), model.password());
+
+        if (loginResponse.isPresent()) {
+            LoginResponseDTO responseDTO = loginResponse.get();
+
+            // Check if user is enabled before returning the response
+            if (!responseDTO.getUser().isEnabled()) {
+                throw new DisabledUserException(responseDTO.getUser().getUsername());
+            }
+
+            return ResponseEntity.ok(responseDTO);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
+
 
     @PutMapping("{id}")
     public ResponseEntity<RegisteredUserDTO> update(@PathVariable Long id, @RequestBody RegisteredUserDTO userDto) {

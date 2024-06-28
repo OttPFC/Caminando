@@ -3,6 +3,7 @@ package com.caminando.Caminando.businesslayer.services.dto.user;
 import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import lombok.Builder;
 import lombok.Data;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class RegisteredUserDTO {
     String username;
     String email;
     String city;
+    @JsonIgnore
     String password;
     boolean enabled;
     private final List<RoleEntity> roles;
