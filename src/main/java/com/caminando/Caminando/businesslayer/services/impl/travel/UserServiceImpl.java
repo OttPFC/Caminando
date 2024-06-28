@@ -146,17 +146,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RegisteredUserDTO update(long id, String username) {
-        var user = usersRepository.findById(id).orElseThrow(()-> new NotFoundException(id));
+    public RegisteredUserDTO update(Long id, RegisteredUserDTO userDto) {
+        User user = usersRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id));
 
-        var usernameDuplicated = usersRepository.findOneByUsername(username);
+        // Aggiorna solo i campi presenti in userDto
+        if (userDto.getFirstName() != null) user.setFirstName(userDto.getFirstName());
+        if (userDto.getLastName() != null) user.setLastName(userDto.getLastName());
+        if (userDto.getUsername() != null) user.setUsername(userDto.getUsername());
+        if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
+        if (userDto.getCity() != null) user.setCity(userDto.getCity());
+        if (userDto.getPassword() != null) user.setPassword(userDto.getPassword());
+        if (userDto.getRoles() != null) user.setRoles(userDto.getRoles());
+        user.setEnabled(userDto.isEnabled());
 
-        if (usernameDuplicated.isPresent()) {
-            throw new DuplicateUsernameException(username);
-        } else {
-            user.setUsername(username);
-            return mapRegisteredUser.map(usersRepository.save(user));
-        }
+        User updatedUser = usersRepository.save(user);
+
+        return mapRegisteredUser.map(updatedUser);
     }
 
     @Override

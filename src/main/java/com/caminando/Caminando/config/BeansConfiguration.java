@@ -47,8 +47,22 @@ public class BeansConfiguration {
 				.withFirstName(input.getFirstName())
 				.withLastName(input.getLastName())
 				.withUsername(input.getUsername())
+				.withCity(input.getCity())
 				.withEmail(input.getEmail())
 				.withRoles(input.getRoles())
+				.build();
+	}
+
+	@Bean
+	@Scope("singleton")
+	public Mapper<RegisteredUserDTO, User> mapRegisteredUser2UserEntity() {
+		return (input) -> User.builder()
+				.withFirstName(input.getFirstName())
+				.withLastName(input.getLastName())
+				.withUsername(input.getUsername())
+				.withCity(input.getCity())
+				.withEmail(input.getEmail())
+				.withPassword(input.getPassword())
 				.build();
 	}
 
@@ -316,6 +330,7 @@ public class BeansConfiguration {
 				.withFirstName(user.getFirstName())
 				.withLastName(user.getLastName())
 				.withUsername(user.getUsername())
+				.withCity(user.getCity())
 				.withEmail(user.getEmail())
 				.withRoles(user.getRoles())
 				.build();
@@ -326,6 +341,7 @@ public class BeansConfiguration {
 				.withFirstName(userDTO.getFirstName())
 				.withLastName(userDTO.getLastName())
 				.withUsername(userDTO.getUsername())
+				.withCity(userDTO.getCity())
 				.withEmail(userDTO.getEmail())
 				.withRoles(userDTO.getRoles())
 				.build();

@@ -21,6 +21,7 @@ public class SecurityUserDetails implements UserDetails {
 	private Collection<? extends GrantedAuthority> authorities;
 	private String password;
 	private String username;
+	private String email;
 	private boolean accountNonExpired;
 	private boolean accountNonLocked;
 	private boolean credentialsNonExpired;
@@ -33,6 +34,7 @@ public class SecurityUserDetails implements UserDetails {
 		return SecurityUserDetails.builder()
 				.withUsername(user.getUsername())
 				.withPassword(user.getPassword())
+				.withEmail(user.getEmail())
 				.withAuthorities(authorities)
 				.withEnabled(user.isEnabled())
 				.withAccountNonExpired(true)

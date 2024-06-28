@@ -20,7 +20,7 @@ public interface UserService{
 
     Page<User> getAll(Pageable p);
 
-    RegisteredUserDTO update(long id, String username);
+    RegisteredUserDTO update(Long id, RegisteredUserDTO userDto);
 
     RegisteredUserDTO delete(Long id);
 

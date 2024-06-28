@@ -60,11 +60,11 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/user/{id}").authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll()
 						//ADMIN
 						.requestMatchers(HttpMethod.GET, "/**").hasAuthority("ADMIN")
 						// ------------------------------------------------------------------------
-
+						.requestMatchers(HttpMethod.POST, "/api/trips").authenticated()
 						//ITINERARY
 						.requestMatchers(HttpMethod.POST, "/api/itinerary").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.POST, "/api/itinerary/{id}").hasAuthority("ADMIN")
@@ -106,7 +106,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/place-to-stay/{id}").hasAuthority("ADMIN")
 						//ADMIN
 						.requestMatchers(HttpMethod.PUT, "/**").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").permitAll()
 						//---------------------------------------------------------------------------
 
 						//ITINERARY

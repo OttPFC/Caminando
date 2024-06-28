@@ -40,8 +40,11 @@ public class UserController {
 
     @GetMapping("{id}")
     public ResponseEntity<RegisteredUserDTO> getUser(@PathVariable Long id) {
+        System.out.println("first try");
         try {
             RegisteredUserDTO userDTO = userService.getById(id);
+            System.out.println(userDTO);
+            System.out.println("second try");
             return new ResponseEntity<>(userDTO, HttpStatus.OK);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -77,9 +80,9 @@ public class UserController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<RegisteredUserDTO> update(@PathVariable Long id, @RequestParam("username") String username) {
-        var u = userService.update(id, username);
-        return new ResponseEntity<>(u, HttpStatus.OK);
+    public ResponseEntity<RegisteredUserDTO> update(@PathVariable Long id, @RequestBody RegisteredUserDTO userDto) {
+        var updatedUser = userService.update(id, userDto);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @PatchMapping("{id}/add-role")
