@@ -1,68 +1,61 @@
 package com.caminando.Caminando.presentationlayer.api.controller.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.PlaceToStayDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.PlaceToStayResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.PlaceToStayService;
-import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.PlaceToStay;
-import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
-import com.caminando.Caminando.presentationlayer.api.models.itinerary.GenericModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/place-to-stay")
+@RequestMapping("/api/placesToStay")
 public class PlaceToStayController {
+
     @Autowired
-    private PlaceToStayService service;
+    private PlaceToStayService placeToStayService;
 
-
-
-    @PostMapping
-    public ResponseEntity<PlaceToStay> createPlaceToStay(@RequestBody @Validated GenericModel model, BindingResult validator){
-        if (validator.hasErrors()) {
-            throw new ApiValidationException(validator.getAllErrors());
-        }
-        var placeToStay = service.save(PlaceToStayDTO.builder()
-                .withTitle(model.title())
-                .withDescription(model.description())
-
-                .build());
-        return new ResponseEntity<>(placeToStay, HttpStatus.CREATED);
+    @GetMapping
+    public ResponseEntity<Page<PlaceToStayResponseDTO>> getAllPlacesToStay(Pageable pageable) {
+        Page<PlaceToStayResponseDTO> placesToStay = placeToStayService.getAll(pageable);
+        return new ResponseEntity<>(placesToStay, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlaceToStay> getPlaceToStayById(@PathVariable Long id) {
-        PlaceToStay placeToStay = service.getById(id);
-        if (placeToStay!= null) {
+    public ResponseEntity<PlaceToStayResponseDTO> getPlaceToStayById(@PathVariable Long id) {
+        PlaceToStayResponseDTO placeToStay = placeToStayService.getById(id);
+        if (placeToStay != null) {
             return new ResponseEntity<>(placeToStay, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping
-    public ResponseEntity<Page<PlaceToStay>> getAllPlaceToStay(Pageable p){
-        var allplaceToStay = service.getAll(p);
-        var headers = new HttpHeaders();
-        headers.add("Todo:", String.valueOf(allplaceToStay.getTotalElements()));
-        return new ResponseEntity<>(allplaceToStay, headers,HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<PlaceToStayResponseDTO> createPlaceToStay(@RequestBody PlaceToStayDTO placeToStayDTO) {
+        PlaceToStayResponseDTO createdPlaceToStay = placeToStayService.save(placeToStayDTO);
+        return new ResponseEntity<>(createdPlaceToStay, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PlaceToStay> updatePlaceToStay(@PathVariable Long id, @RequestBody PlaceToStay placeToStayModified){
-        var placeToStay = service.update(id,placeToStayModified);
-        return new ResponseEntity<>(placeToStay, HttpStatus.OK);
-    }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<PlaceToStay> deleteQuickFacts(@PathVariable Long id){
-        var placeToStay = service.delete(id);
-        return new ResponseEntity<>(placeToStay, HttpStatus.OK);
+    public ResponseEntity<PlaceToStayResponseDTO> updatePlaceToStay(@PathVariable Long id, @RequestBody PlaceToStayDTO placeToStayDTO) {
+        PlaceToStayResponseDTO updatedPlaceToStay = placeToStayService.update(id, placeToStayDTO);
+        if (updatedPlaceToStay != null) {
+            return new ResponseEntity<>(updatedPlaceToStay, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePlaceToStay(@PathVariable Long id) {
+        PlaceToStayResponseDTO deletedPlaceToStay = placeToStayService.delete(id);
+        if (deletedPlaceToStay != null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

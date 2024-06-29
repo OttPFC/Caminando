@@ -1,10 +1,10 @@
 package com.caminando.Caminando.presentationlayer.api.controller.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.SuggestItineraryDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.SuggestItineraryResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.SuggestItineraryService;
-import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
@@ -19,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/itinerary")
+@RequestMapping("/api/itinerary")
 public class SuggestItineraryController {
 
     @Autowired
@@ -29,35 +29,37 @@ public class SuggestItineraryController {
     private UserRepository userRepository;
 
     @Autowired
-    public Mapper<User, RegisteredUserDTO> mapUserEntity2RegisteredUser;
+    private Mapper<User, RegisteredUserDTO> mapUserEntityToRegisteredUser;
 
     @PostMapping
-    public ResponseEntity<SuggestItinerary> createItinerary(@RequestBody @Validated SuggestItineraryModel model, BindingResult validator){
+    public ResponseEntity<SuggestItineraryResponseDTO> createItinerary(@RequestBody @Validated SuggestItineraryModel model, BindingResult validator) {
         if (validator.hasErrors()) {
             throw new ApiValidationException(validator.getAllErrors());
         }
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        RegisteredUserDTO userDTO = mapUserEntity2RegisteredUser.map(user);
+        RegisteredUserDTO userDTO = mapUserEntityToRegisteredUser.map(user);
 
-        var itinerary = itService.save(SuggestItineraryDTO.builder()
+        SuggestItineraryDTO suggestItineraryDTO = SuggestItineraryDTO.builder()
                 .withName(model.name())
                 .withDescription(model.description())
                 .withLocation(model.location())
                 .withUser(userDTO)
-                .build());
+                .build();
 
-        return new ResponseEntity<>(itinerary, HttpStatus.CREATED);
+        SuggestItineraryResponseDTO createdItinerary = itService.save(suggestItineraryDTO);
+        return new ResponseEntity<>(createdItinerary, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SuggestItinerary> updateItinerary(@PathVariable Long id, @RequestBody SuggestItinerary itModified){
-        var it = itService.update(id, itModified);
-        return new ResponseEntity<>(it, HttpStatus.OK);
+    public ResponseEntity<SuggestItineraryResponseDTO> updateItinerary(@PathVariable Long id, @RequestBody SuggestItineraryDTO dto) {
+        SuggestItineraryResponseDTO updatedItinerary = itService.update(id, dto);
+        return updatedItinerary != null ? new ResponseEntity<>(updatedItinerary, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<SuggestItinerary> deleteItinerary(@PathVariable Long id){
-        var it = itService.delete(id);
-        return new ResponseEntity<>(it, HttpStatus.OK);
+    public ResponseEntity<Void> deleteItinerary(@PathVariable Long id) {
+        SuggestItineraryResponseDTO deletedItinerary = itService.delete(id);
+        return deletedItinerary != null ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

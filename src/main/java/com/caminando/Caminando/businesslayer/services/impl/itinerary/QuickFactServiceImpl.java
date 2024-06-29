@@ -1,6 +1,7 @@
 package com.caminando.Caminando.businesslayer.services.impl.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.QuickFactsDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.QuickFactsResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.QuickFactService;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.QuickFacts;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,43 +21,58 @@ import java.util.Optional;
 public class QuickFactServiceImpl implements QuickFactService {
 
     @Autowired
-    QuickFatcsRepository repo;
+    private QuickFatcsRepository repo;
 
     @Autowired
-    Mapper<QuickFactsDTO, QuickFacts> mapper;
+    private Mapper<QuickFactsDTO, QuickFacts> mapper;
 
     @Autowired
-    EntityUtils utils;
+    private Mapper<QuickFacts, QuickFactsResponseDTO> quickFactsEntityToResponseMapper;
+
+    @Autowired
+    private EntityUtils utils;
 
     @Override
-    public Page<QuickFacts> getAll(Pageable p) {
-        return repo.findAll(p);
+    public Page<QuickFactsResponseDTO> getAll(Pageable pageable) {
+        Page<QuickFacts> quickFacts = repo.findAll(pageable);
+        return quickFacts.map(quickFactsEntityToResponseMapper::map);
     }
 
     @Override
-    public QuickFacts getById(Long id) {
-        return repo.findById(id).orElse(null);
+    public QuickFactsResponseDTO getById(Long id) {
+        Optional<QuickFacts> quickFact = repo.findById(id);
+        return quickFact.map(quickFactsEntityToResponseMapper::map).orElse(null);
     }
 
     @Override
-    public QuickFacts save(QuickFactsDTO e) {
-        return repo.save(mapper.map(e));
+    @Transactional
+    public QuickFactsResponseDTO save(QuickFactsDTO quickFactsDTO) {
+        QuickFacts quickFact = mapper.map(quickFactsDTO);
+        QuickFacts savedQuickFact = repo.save(quickFact);
+        return quickFactsEntityToResponseMapper.map(savedQuickFact);
     }
 
     @Override
-    public QuickFacts update(Long id, QuickFacts e) {
-        var entity = this.getById(id);
-        utils.copy(e, entity);
-        return repo.save(entity);
+    @Transactional
+    public QuickFactsResponseDTO update(Long id, QuickFactsDTO quickFactsDTO) {
+        Optional<QuickFacts> optionalQuickFact = repo.findById(id);
+        if (optionalQuickFact.isPresent()) {
+            QuickFacts existingQuickFact = optionalQuickFact.get();
+            utils.copy(quickFactsDTO, existingQuickFact);
+            QuickFacts updatedQuickFact = repo.save(existingQuickFact);
+            return quickFactsEntityToResponseMapper.map(updatedQuickFact);
+        }
+        return null;
     }
 
     @Override
-    public QuickFacts delete(Long id) {
-        Optional<QuickFacts> optionalEntity = repo.findById(id);
-        if (optionalEntity.isPresent()) {
-            QuickFacts entity = optionalEntity.get();
-            repo.delete(entity);
-            return entity;
+    @Transactional
+    public QuickFactsResponseDTO delete(Long id) {
+        Optional<QuickFacts> optionalQuickFact = repo.findById(id);
+        if (optionalQuickFact.isPresent()) {
+            QuickFacts quickFact = optionalQuickFact.get();
+            repo.delete(quickFact);
+            return quickFactsEntityToResponseMapper.map(quickFact);
         }
         return null;
     }

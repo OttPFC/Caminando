@@ -1,85 +1,61 @@
 package com.caminando.Caminando.presentationlayer.api.controller.itinerary;
 
-import com.caminando.Caminando.businesslayer.services.dto.itinerary.SuggestItineraryDTO;
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.ToDoDTO;
-import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
-import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.SuggestItineraryService;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.ToDoResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.ToDoService;
-import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
-import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.ToDo;
-import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
-import com.caminando.Caminando.presentationlayer.api.models.itinerary.GenericModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/todo")
+@RequestMapping("/api/todos")
 public class ToDoController {
 
     @Autowired
-    private ToDoService service;
+    private ToDoService toDoService;
 
-    @Autowired
-    private SuggestItineraryService itService;
-
-    @Autowired
-    Mapper<SuggestItinerary, SuggestItineraryDTO> itMapper;
-
-    @PostMapping("/api/{itineraryId}")
-    public ResponseEntity<ToDo> createToDO(@PathVariable Long itineraryId ,@RequestBody @Validated GenericModel model, BindingResult validator){
-        if (validator.hasErrors()) {
-            throw new ApiValidationException(validator.getAllErrors());
-        }
-
-        SuggestItinerary it = itService.getById(itineraryId);
-        SuggestItineraryDTO itDTO = itMapper.map(it);
-        if (it == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        var toDo = service.save(ToDoDTO.builder()
-                        .withTitle(model.title())
-                        .withDescription(model.description())
-                        .withSuggestItinerary(itDTO)
-                .build());
-        return new ResponseEntity<>(toDo, HttpStatus.CREATED);
+    @GetMapping
+    public ResponseEntity<Page<ToDoResponseDTO>> getAllToDos(Pageable pageable) {
+        Page<ToDoResponseDTO> todos = toDoService.getAll(pageable);
+        return new ResponseEntity<>(todos, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ToDo> getToDoById(@PathVariable Long id) {
-        ToDo toDo = service.getById(id);
-        if (toDo!= null) {
-            return new ResponseEntity<>(toDo, HttpStatus.OK);
+    public ResponseEntity<ToDoResponseDTO> getToDoById(@PathVariable Long id) {
+        ToDoResponseDTO todo = toDoService.getById(id);
+        if (todo != null) {
+            return new ResponseEntity<>(todo, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping
-    public ResponseEntity<Page<ToDo>> getAllToDo(Pageable p){
-        var allToDo = service.getAll(p);
-        var headers = new HttpHeaders();
-        headers.add("Todo:", String.valueOf(allToDo.getTotalElements()));
-        return new ResponseEntity<>(allToDo, headers,HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<ToDoResponseDTO> createToDo(@RequestBody ToDoDTO toDoDTO) {
+        ToDoResponseDTO createdToDo = toDoService.save(toDoDTO);
+        return new ResponseEntity<>(createdToDo, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ToDo> updateToDo(@PathVariable Long id, @RequestBody ToDo toDoModified){
-        var toDo = service.update(id,toDoModified);
-        return new ResponseEntity<>(toDo, HttpStatus.OK);
+    public ResponseEntity<ToDoResponseDTO> updateToDo(@PathVariable Long id, @RequestBody ToDoDTO toDoDTO) {
+        ToDoResponseDTO updatedToDo = toDoService.update(id, toDoDTO);
+        if (updatedToDo != null) {
+            return new ResponseEntity<>(updatedToDo, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<ToDo> deleteToDo(@PathVariable Long id){
-        var toDo = service.delete(id);
-        return new ResponseEntity<>(toDo, HttpStatus.OK);
+    public ResponseEntity<Void> deleteToDo(@PathVariable Long id) {
+        ToDoResponseDTO deletedToDo = toDoService.delete(id);
+        if (deletedToDo != null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
-
-
-
 }

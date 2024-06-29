@@ -1,68 +1,61 @@
 package com.caminando.Caminando.presentationlayer.api.controller.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.QuickFactsDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.QuickFactsResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.QuickFactService;
-import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.QuickFacts;
-import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
-import com.caminando.Caminando.presentationlayer.api.models.itinerary.GenericModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/quick-fact")
+@RequestMapping("/api/quickfacts")
 public class QuickFactsController {
 
     @Autowired
-    private QuickFactService service;
+    private QuickFactService quickFactService;
 
-
-
-    @PostMapping
-    public ResponseEntity<QuickFacts> createQuickFacts(@RequestBody @Validated GenericModel model, BindingResult validator){
-        if (validator.hasErrors()) {
-            throw new ApiValidationException(validator.getAllErrors());
-        }
-        var quickFacts = service.save(QuickFactsDTO.builder()
-                .withTitle(model.title())
-                .withDescription(model.description())
-
-                .build());
-        return new ResponseEntity<>(quickFacts, HttpStatus.CREATED);
+    @GetMapping
+    public ResponseEntity<Page<QuickFactsResponseDTO>> getAllQuickFacts(Pageable pageable) {
+        Page<QuickFactsResponseDTO> quickFacts = quickFactService.getAll(pageable);
+        return new ResponseEntity<>(quickFacts, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuickFacts> getQuickFactsById(@PathVariable Long id) {
-        QuickFacts quickFacts = service.getById(id);
-        if (quickFacts!= null) {
-            return new ResponseEntity<>(quickFacts, HttpStatus.OK);
+    public ResponseEntity<QuickFactsResponseDTO> getQuickFactById(@PathVariable Long id) {
+        QuickFactsResponseDTO quickFact = quickFactService.getById(id);
+        if (quickFact != null) {
+            return new ResponseEntity<>(quickFact, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping
-    public ResponseEntity<Page<QuickFacts>> getAllQuickFacts(Pageable p){
-        var allquickFacts = service.getAll(p);
-        var headers = new HttpHeaders();
-        headers.add("Todo:", String.valueOf(allquickFacts.getTotalElements()));
-        return new ResponseEntity<>(allquickFacts, headers,HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<QuickFactsResponseDTO> createQuickFact(@RequestBody QuickFactsDTO quickFactsDTO) {
+        QuickFactsResponseDTO createdQuickFact = quickFactService.save(quickFactsDTO);
+        return new ResponseEntity<>(createdQuickFact, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<QuickFacts> updateRestaurant(@PathVariable Long id, @RequestBody QuickFacts quickFactsModified){
-        var quickFacts = service.update(id,quickFactsModified);
-        return new ResponseEntity<>(quickFacts, HttpStatus.OK);
+    public ResponseEntity<QuickFactsResponseDTO> updateQuickFact(@PathVariable Long id, @RequestBody QuickFactsDTO quickFactsDTO) {
+        QuickFactsResponseDTO updatedQuickFact = quickFactService.update(id, quickFactsDTO);
+        if (updatedQuickFact != null) {
+            return new ResponseEntity<>(updatedQuickFact, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<QuickFacts> deleteQuickFacts(@PathVariable Long id){
-        var quickFacts = service.delete(id);
-        return new ResponseEntity<>(quickFacts, HttpStatus.OK);
+    public ResponseEntity<Void> deleteQuickFact(@PathVariable Long id) {
+        QuickFactsResponseDTO deletedQuickFact = quickFactService.delete(id);
+        if (deletedQuickFact != null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

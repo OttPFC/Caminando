@@ -37,14 +37,14 @@ public class User extends BaseEntity {
     private String password;
 
     @Column(length = 50)
-    private String description;
+    private String bio;
 
     @Column(length = 50)
     private String city;
 
-    private int follow;
+    private Long follow;
 
-    private int followers;
+    private Long followers;
 
     @Column(nullable = false)
     private boolean isEnabled;

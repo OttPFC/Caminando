@@ -1,6 +1,7 @@
 package com.caminando.Caminando.businesslayer.services.impl.itinerary;
 
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.FoodDTO;
+import com.caminando.Caminando.businesslayer.services.dto.itinerary.FoodResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.itinerary.FoodService;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.Food;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,45 +21,58 @@ import java.util.Optional;
 public class FoodServiceImpl implements FoodService {
 
     @Autowired
-    FoodRepository foodRepository;
+    private FoodRepository foodRepository;
 
     @Autowired
-    Mapper<FoodDTO, Food> foodMapper;
+    private Mapper<FoodDTO, Food> foodMapper;
 
     @Autowired
-    EntityUtils utils;
+    private Mapper<Food, FoodResponseDTO> foodEntityToResponseMapper;
 
-
+    @Autowired
+    private EntityUtils utils;
 
     @Override
-    public Page<Food> getAll(Pageable p) {
-        return foodRepository.findAll(p);
+    public Page<FoodResponseDTO> getAll(Pageable pageable) {
+        Page<Food> foods = foodRepository.findAll(pageable);
+        return foods.map(foodEntityToResponseMapper::map);
     }
 
     @Override
-    public Food getById(Long id) {
-        return foodRepository.findById(id).orElse(null);
+    public FoodResponseDTO getById(Long id) {
+        Optional<Food> food = foodRepository.findById(id);
+        return food.map(foodEntityToResponseMapper::map).orElse(null);
     }
 
     @Override
-    public Food save(FoodDTO e) {
-        return foodRepository.save(foodMapper.map(e));
+    @Transactional
+    public FoodResponseDTO save(FoodDTO foodDTO) {
+        Food food = foodMapper.map(foodDTO);
+        Food savedFood = foodRepository.save(food);
+        return foodEntityToResponseMapper.map(savedFood);
     }
 
     @Override
-    public Food update(Long id, Food e) {
-        var entity = this.getById(id);
-        utils.copy(e, entity);
-        return foodRepository.save(entity);
+    @Transactional
+    public FoodResponseDTO update(Long id, FoodDTO foodDTO) {
+        Optional<Food> optionalFood = foodRepository.findById(id);
+        if (optionalFood.isPresent()) {
+            Food existingFood = optionalFood.get();
+            utils.copy(foodDTO, existingFood);
+            Food updatedFood = foodRepository.save(existingFood);
+            return foodEntityToResponseMapper.map(updatedFood);
+        }
+        return null;
     }
 
     @Override
-    public Food delete(Long id) {
-        Optional<Food> optinalEntity = foodRepository.findById(id);
-        if (optinalEntity.isPresent()) {
-            Food entity = optinalEntity.get();
-            foodRepository.delete(entity);
-            return entity;
+    @Transactional
+    public FoodResponseDTO delete(Long id) {
+        Optional<Food> optionalFood = foodRepository.findById(id);
+        if (optionalFood.isPresent()) {
+            Food food = optionalFood.get();
+            foodRepository.delete(food);
+            return foodEntityToResponseMapper.map(food);
         }
         return null;
     }

@@ -1,6 +1,7 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
-import com.caminando.Caminando.businesslayer.services.dto.travel.PositionDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.PositionRequestDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.PositionResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.PositionService;
@@ -9,6 +10,7 @@ import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.datalayer.repositories.travel.PositionRepository;
 import com.caminando.Caminando.presentationlayer.api.models.travel.PositionModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 
 @Service
+@Slf4j
 public class PositionServiceImpl implements PositionService {
 
     @Autowired
@@ -30,81 +33,87 @@ public class PositionServiceImpl implements PositionService {
 
     @Autowired
     private Mapper<User, RegisteredUserDTO> userEntityToUserDTOMapper;
-    @Autowired
-    private Mapper<PositionDTO, Position> positionDTOToEntityMapper;
 
     @Autowired
-    private Mapper<Position, PositionDTO> positionEntityToDTOMapper;
+    private Mapper<PositionRequestDTO, Position> positionDTOToEntityMapper;
+
+    @Autowired
+    private Mapper<Position, PositionResponseDTO> positionEntityToResponseMapper;
+
+    @Autowired
+    private Mapper<Position, PositionRequestDTO> positionEntityToRequestDTOMapper;
 
     @Override
-    public Page<Position> getAll(Pageable pageable) {
-        return positionRepository.findAll(pageable);
+    public Page<PositionResponseDTO> getAll(Pageable pageable) {
+        Page<Position> positions = positionRepository.findAll(pageable);
+        return positions.map(positionEntityToResponseMapper::map);
     }
 
     @Override
-    public Position getById(Long id) {
-        return positionRepository.findById(id)
+    public PositionResponseDTO getById(Long id) {
+        Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Position not found with id: " + id));
+        return positionEntityToResponseMapper.map(position);
     }
 
     @Override
     @Transactional
-    public Position save(PositionDTO positionDTO) {
-        Position position = positionDTOToEntityMapper.map(positionDTO);
-        return positionRepository.save(position);
-    }
-
-    @Override
-    @Transactional
-    public Position update(Long id, Position positionDetails) {
+    public PositionResponseDTO update(Long id, PositionRequestDTO positionRequestDTO) {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Position not found with id: " + id));
 
-        position.setLatitude(positionDetails.getLatitude());
-        position.setLongitude(positionDetails.getLongitude());
-        position.setTimestamp(positionDetails.getTimestamp());
-        position.setNomeLocalita(positionDetails.getNomeLocalita());
+        position.setLatitude(positionRequestDTO.getLatitude());
+        position.setLongitude(positionRequestDTO.getLongitude());
+        position.setTimestamp(positionRequestDTO.getTimestamp());
+        position.setNomeLocalita(positionRequestDTO.getNomeLocalita());
 
-        return positionRepository.save(position);
+        Position updatedPosition = positionRepository.save(position);
+        return positionEntityToResponseMapper.map(updatedPosition);
     }
 
     @Override
     @Transactional
-    public Position delete(Long id) {
+    public PositionResponseDTO delete(Long id) {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Position not found with id: " + id));
         positionRepository.delete(position);
-        return position;
+        return positionEntityToResponseMapper.map(position);
     }
 
     @Override
-    public PositionDTO getNomeLocalitaAndTimestampById(Long id) {
+    public PositionRequestDTO getNomeLocalitaAndTimestampById(Long id) {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Position not found with id: " + id));
-        return positionEntityToDTOMapper.map(position);
+        return positionEntityToRequestDTOMapper.map(position);
     }
 
     @Override
-    public PositionDTO mapEntityToDTO(Position position) {
-        return positionEntityToDTOMapper.map(position);
+    @Transactional
+    public PositionResponseDTO save(PositionRequestDTO positionRequestDTO) {
+        Position position = positionDTOToEntityMapper.map(positionRequestDTO);
+        Position savedPosition = positionRepository.save(position);
+        return positionEntityToResponseMapper.map(savedPosition);
     }
 
     @Override
-    public Position save(PositionModel model) {
+    @Transactional
+    public PositionResponseDTO savePosition(PositionRequestDTO positionRequestDTO) {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         RegisteredUserDTO userDTO = userEntityToUserDTOMapper.map(user);
 
-        PositionDTO positionDTO = PositionDTO.builder()
-                .withLatitude(model.latitude())
-                .withLongitude(model.longitude())
+        PositionRequestDTO newPositionRequestDTO = PositionRequestDTO.builder()
+                .withLatitude(positionRequestDTO.getLatitude())
+                .withLongitude(positionRequestDTO.getLongitude())
                 .withTimestamp(Instant.now())
-                .withNomeLocalita(model.nomeLocalita())
+                .withNomeLocalita(positionRequestDTO.getNomeLocalita())
                 .withUser(userDTO)
                 .build();
 
-        Position newPosition = positionDTOToEntityMapper.map(positionDTO);
-
-        return positionRepository.save(newPosition);
+        Position newPosition = positionDTOToEntityMapper.map(newPositionRequestDTO);
+        Position savedPosition = positionRepository.save(newPosition);
+        return positionEntityToResponseMapper.map(savedPosition);
     }
 }
+
+

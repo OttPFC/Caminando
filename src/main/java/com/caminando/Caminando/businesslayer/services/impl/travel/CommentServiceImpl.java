@@ -1,6 +1,7 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
-import com.caminando.Caminando.businesslayer.services.dto.travel.CommentDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.CommentRequestDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.CommentResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.CommentService;
 import com.caminando.Caminando.datalayer.entities.travel.Comment;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,62 +30,73 @@ public class CommentServiceImpl implements CommentService {
     private UserRepository userRepository;
 
     @Autowired
-    private Mapper<CommentDTO, Comment> commentDTOToEntityMapper;
+    private Mapper<CommentRequestDTO, Comment> commentDTOToEntityMapper;
 
     @Autowired
-    private Mapper<Comment, CommentDTO> commentEntityToDTOMapper;
+    private Mapper<Comment, CommentResponseDTO> commentEntityToResponseMapper;
+
+    @Autowired
+    private Mapper<Comment, CommentRequestDTO> commentEntityToRequestDTOMapper;
 
     @Override
-    public Page<Comment> getAll(Pageable p) {
-        return commentRepository.findAll(p);
+    public Page<CommentResponseDTO> getAll(Pageable pageable) {
+        Page<Comment> comments = commentRepository.findAll(pageable);
+        return comments.map(commentEntityToResponseMapper::map);
     }
 
     @Override
-    public Comment getById(Long id) {
+    public CommentResponseDTO getById(Long id) {
         Optional<Comment> comment = commentRepository.findById(id);
-        return comment.orElse(null);
+        return comment.map(commentEntityToResponseMapper::map).orElse(null);
     }
 
     @Override
-    public Comment save(CommentDTO commentDTO) {
+    @Transactional
+    public CommentResponseDTO save(CommentRequestDTO commentRequestDTO) {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Comment comment = commentDTOToEntityMapper.map(commentDTO);
+        Comment comment = commentDTOToEntityMapper.map(commentRequestDTO);
         comment.setUser(user);
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+        return commentEntityToResponseMapper.map(savedComment);
     }
 
     @Override
-    public Comment update(Long id, Comment updatedComment) {
+    @Transactional
+    public CommentResponseDTO update(Long id, CommentRequestDTO updatedCommentRequestDTO) {
         Optional<Comment> optionalComment = commentRepository.findById(id);
         if (optionalComment.isPresent()) {
-            Comment comment = optionalComment.get();
-            comment.setText(updatedComment.getText());
-            comment.setDate(updatedComment.getDate());
-            return commentRepository.save(comment);
+            Comment existingComment = optionalComment.get();
+            existingComment.setText(updatedCommentRequestDTO.getText());
+            existingComment.setDate(updatedCommentRequestDTO.getDate());
+            Comment updatedComment = commentRepository.save(existingComment);
+            return commentEntityToResponseMapper.map(updatedComment);
         }
         return null;
     }
 
     @Override
-    public Comment delete(Long id) {
+    @Transactional
+    public CommentResponseDTO delete(Long id) {
         Optional<Comment> optionalComment = commentRepository.findById(id);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
             commentRepository.delete(comment);
-            return comment;
+            return commentEntityToResponseMapper.map(comment);
         }
         return null;
     }
 
     @Override
-    public Page<Comment> getCommentsByStepId(Long stepId, Pageable pageable) {
-        return commentRepository.findByStepId(stepId, pageable);
+    public Page<CommentResponseDTO> getCommentsByStepId(Long stepId, Pageable pageable) {
+        Page<Comment> comments = commentRepository.findByStepId(stepId, pageable);
+        return comments.map(commentEntityToResponseMapper::map);
     }
 
     @Override
-    public CommentDTO mapEntityToDTO(Comment comment) {
-        return commentEntityToDTOMapper.map(comment);
+    public CommentRequestDTO mapEntityToDTO(Comment comment) {
+        return commentEntityToRequestDTOMapper.map(comment);
     }
 }
+

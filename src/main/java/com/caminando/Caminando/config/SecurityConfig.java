@@ -64,7 +64,7 @@ public class SecurityConfig {
 						//ADMIN
 						.requestMatchers(HttpMethod.GET, "/**").hasAuthority("ADMIN")
 						// ------------------------------------------------------------------------
-						.requestMatchers(HttpMethod.POST, "/api/trips").authenticated()
+						.requestMatchers(HttpMethod.POST, "/api/trips").permitAll()
 						//ITINERARY
 						.requestMatchers(HttpMethod.POST, "/api/itinerary").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.POST, "/api/itinerary/{id}").hasAuthority("ADMIN")

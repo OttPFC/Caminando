@@ -3,8 +3,6 @@ package com.caminando.Caminando.businesslayer.services.dto.travel;
 
 import com.caminando.Caminando.businesslayer.services.dto.BaseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
-import com.caminando.Caminando.datalayer.entities.travel.Step;
-import com.caminando.Caminando.datalayer.entities.travel.User;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -14,10 +12,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(setterPrefix = "with")
-public class CommentDTO extends BaseDTO {
+public class CommentRequestDTO extends BaseDTO {
 
     private String text;
     private LocalDate date;
-    private StepDTO step;
+    private StepRequestDTO step;
     private RegisteredUserDTO user;
 }

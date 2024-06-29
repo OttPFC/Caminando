@@ -1,11 +1,11 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
-import com.caminando.Caminando.businesslayer.services.dto.travel.PositionDTO;
-import com.caminando.Caminando.businesslayer.services.dto.travel.StepDTO;
-import com.caminando.Caminando.businesslayer.services.dto.travel.TripDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.PositionRequestDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.StepRequestDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.StepResponseDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.TripRequestDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
-import com.caminando.Caminando.businesslayer.services.interfaces.travel.PositionService;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.StepService;
 import com.caminando.Caminando.datalayer.entities.travel.Position;
 import com.caminando.Caminando.datalayer.entities.travel.Step;
@@ -35,6 +35,7 @@ public class StepServiceImpl implements StepService {
 
     @Autowired
     private StepRepository stepRepository;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -42,73 +43,80 @@ public class StepServiceImpl implements StepService {
     private TripRepository tripRepository;
 
     @Autowired
-    PositionRepository positionRepository;
-    @Autowired
-    private Mapper<StepDTO, Step> stepDTOToEntityMapper;
+    private PositionRepository positionRepository;
 
     @Autowired
-    private Mapper<Step, StepDTO> stepEntityToDTOMapper;
+    private Mapper<StepRequestDTO, Step> stepDTOToEntityMapper;
+
+    @Autowired
+    private Mapper<Step, StepRequestDTO> stepEntityToDTOMapper;
+
+    @Autowired
+    private Mapper<Step, StepResponseDTO> stepEntityToResponseMapper;
+
     @Autowired
     private Mapper<User, RegisteredUserDTO> userEntityToUserDTOMapper;
 
     @Autowired
-    private Mapper<Trip, TripDTO> tripMapperToDTO;
+    private Mapper<Trip, TripRequestDTO> tripMapperToDTO;
+
+    @Autowired
+    private Mapper<Position, PositionRequestDTO> positionToDTO;
 
     @Override
-    public Page<Step> getAll(Pageable pageable) {
-        return stepRepository.findAll(pageable);
+    public Page<StepResponseDTO> getAll(Pageable pageable) {
+        Page<Step> steps = stepRepository.findAll(pageable);
+        return steps.map(stepEntityToResponseMapper::map);
     }
 
     @Override
-    public Step getById(Long id) {
+    public StepResponseDTO getById(Long id) {
         Optional<Step> step = stepRepository.findById(id);
-        return step.orElse(null);
+        return step.map(stepEntityToResponseMapper::map).orElse(null);
     }
 
     @Override
     @Transactional
-    public Step save(StepDTO stepDTO) {
-        Step step = stepDTOToEntityMapper.map(stepDTO);
-        return stepRepository.save(step);
+    public StepResponseDTO save(StepRequestDTO stepRequestDTO) {
+        Step step = stepDTOToEntityMapper.map(stepRequestDTO);
+        Step savedStep = stepRepository.save(step);
+        return stepEntityToResponseMapper.map(savedStep);
     }
 
     @Override
     @Transactional
-    public Step update(Long id, Step updatedStep) {
+    public StepResponseDTO update(Long id, StepRequestDTO stepRequestDTO) {
         Optional<Step> optionalStep = stepRepository.findById(id);
         if (optionalStep.isPresent()) {
             Step existingStep = optionalStep.get();
-            existingStep.setDescription(updatedStep.getDescription());
-            existingStep.setLikes(updatedStep.getLikes());
-            existingStep.setArrivalDate(updatedStep.getArrivalDate());
-            existingStep.setDepartureDate(updatedStep.getDepartureDate());
-            return stepRepository.save(existingStep);
+            // Copia i campi dal DTO all'entità
+            existingStep.setDescription(stepRequestDTO.getDescription());
+            existingStep.setLikes(stepRequestDTO.getLikes());
+            existingStep.setArrivalDate(stepRequestDTO.getArrivalDate());
+            existingStep.setDepartureDate(stepRequestDTO.getDepartureDate());
+            Step updatedStep = stepRepository.save(existingStep);
+            return stepEntityToResponseMapper.map(updatedStep);
         }
         return null;
     }
 
     @Override
     @Transactional
-    public Step delete(Long id) {
+    public StepResponseDTO delete(Long id) {
         Optional<Step> optionalStep = stepRepository.findById(id);
         if (optionalStep.isPresent()) {
             Step step = optionalStep.get();
             stepRepository.delete(step);
-            return step;
+            return stepEntityToResponseMapper.map(step);
         }
         return null;
     }
 
-    @Override
-    public StepDTO mapEntityToDTO(Step step) {
-        return null;
-    }
 
-    @Autowired
-    Mapper<Position, PositionDTO> positionToDTO;
+
     @Override
     @Transactional
-    public Step createStep(StepModel model, Long tripId, Long positionId) {
+    public StepResponseDTO createStep(StepRequestDTO stepRequestDTO, Long tripId, Long positionId) {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findOneByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -119,23 +127,25 @@ public class StepServiceImpl implements StepService {
         Position position = positionRepository.findById(positionId)
                 .orElseThrow(() -> new EntityNotFoundException("Position not found"));
 
-        PositionDTO positionDTO = positionToDTO.map(position);
+        PositionRequestDTO positionRequestDTO = positionToDTO.map(position);
 
-        StepDTO stepDTO = StepDTO.builder()
-                .withDescription(model.description())
-                .withArrivalDate(model.arrivalDate())
-                .withDepartureDate(model.departureDate())
+        StepRequestDTO newStepRequestDTO = StepRequestDTO.builder()
+                .withDescription(stepRequestDTO.getDescription())
+                .withArrivalDate(stepRequestDTO.getArrivalDate())
+                .withDepartureDate(stepRequestDTO.getDepartureDate())
                 .withTrip(tripMapperToDTO.map(trip))
                 .withComments(new ArrayList<>())
                 .withImages(new ArrayList<>())
-                .withPosition(positionDTO)
+                .withPosition(positionRequestDTO)
                 .build();
 
-        Step newStep = stepDTOToEntityMapper.map(stepDTO);
+        Step newStep = stepDTOToEntityMapper.map(newStepRequestDTO);
         trip.getSteps().add(newStep);
 
-        return stepRepository.save(newStep);
+        Step savedStep = stepRepository.save(newStep);
+        return stepEntityToResponseMapper.map(savedStep);
     }
 
 
 }
+

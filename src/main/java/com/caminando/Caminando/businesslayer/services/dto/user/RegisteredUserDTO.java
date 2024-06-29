@@ -13,22 +13,28 @@ public class RegisteredUserDTO {
     String firstName;
     String lastName;
     String username;
+    String bio;
     String email;
     String city;
     @JsonIgnore
     String password;
     boolean enabled;
+    Long follow;
+    Long followers;
     private final List<RoleEntity> roles;
 
     @Builder(setterPrefix = "with")
-    public RegisteredUserDTO(Long id, String firstName, String lastName, String username, String email,String city,String password,boolean enabled, List<RoleEntity> roles) {
+    public RegisteredUserDTO(Long id, String firstName, String lastName, String username,String bio, String email,String city,String password,boolean enabled,Long follow,Long followers, List<RoleEntity> roles) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
+        this.bio = bio;
         this.email = email;
         this.city = city;
         this.password = password;
+        this.follow = follow;
+        this.followers = followers;
         this.enabled = enabled;
         this.roles = roles;
     }

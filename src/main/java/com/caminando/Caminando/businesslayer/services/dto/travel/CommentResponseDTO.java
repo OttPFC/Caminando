@@ -1,24 +1,20 @@
 package com.caminando.Caminando.businesslayer.services.dto.travel;
 
-
 import com.caminando.Caminando.businesslayer.services.dto.BaseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import lombok.*;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(setterPrefix = "with")
-public class PositionDTO extends BaseDTO {
+public class CommentResponseDTO extends BaseDTO {
 
-    private double latitude;
-    private double longitude;
-    private Instant timestamp;
-    private String nomeLocalita;
-    private StepDTO step;
+    private String text;
+    private LocalDate date;
+    private StepRequestDTO step;
     private RegisteredUserDTO user;
-
 }
