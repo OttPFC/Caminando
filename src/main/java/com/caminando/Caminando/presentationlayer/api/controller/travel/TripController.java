@@ -67,7 +67,7 @@ public class TripController {
             return new ResponseEntity<>(trip, HttpStatus.CREATED);
         } catch (RuntimeException ex) {
             log.error("Error saving trip", ex);
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
