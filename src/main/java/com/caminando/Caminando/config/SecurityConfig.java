@@ -58,13 +58,16 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
+
 						.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/trips").authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/trips/{id}").authenticated()
 						//ADMIN
 						.requestMatchers(HttpMethod.GET, "/**").hasAuthority("ADMIN")
 						// ------------------------------------------------------------------------
-						.requestMatchers(HttpMethod.POST, "/api/trips").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/trips").authenticated()
 						//ITINERARY
 						.requestMatchers(HttpMethod.POST, "/api/itinerary").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.POST, "/api/itinerary/{id}").hasAuthority("ADMIN")

@@ -46,7 +46,9 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public Page<TripResponseDTO> getAll(Pageable pageable) {
-        Page<Trip> trips = tripRepository.findAll(pageable);
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findOneByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        Page<Trip> trips = tripRepository.findAllByUserId(user.getId(), pageable);
         return trips.map(tripEntityToResponseMapper::map);
     }
 

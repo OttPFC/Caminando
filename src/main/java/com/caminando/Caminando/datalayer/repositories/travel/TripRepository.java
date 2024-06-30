@@ -2,6 +2,8 @@ package com.caminando.Caminando.datalayer.repositories.travel;
 
 import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -12,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long>,
                                         PagingAndSortingRepository<Trip, Long> {
-
+    Page<Trip> findAllByUserId(Long userId, Pageable pageable);
     Optional<Trip> getTripByIdAndUserId(Long tripId, Long userId);
     Optional<Trip> findOneByTitle(String title);
     Optional<Trip> findById(Long id);

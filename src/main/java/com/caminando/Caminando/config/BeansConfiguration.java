@@ -55,6 +55,8 @@ public class BeansConfiguration {
 				.withEmail(input.getEmail())
 				.withRoles(input.getRoles())
 				.withEnabled(input.isEnabled())
+				.withImage(input.getProfileImage())
+				.withTrips(input.getTrips())
 				.build();
 	}
 
@@ -73,6 +75,8 @@ public class BeansConfiguration {
 				.withRoles(input.getRoles())
 				.withFollow(input.getFollow())
 				.withFollowers(input.getFollowers())
+				.withProfileImage(input.getImage())
+				.withTrips(input.getTrips())
 				.build();
 	}
 
@@ -134,6 +138,7 @@ public class BeansConfiguration {
 	public Mapper<TripRequestDTO, Trip> mapTripDTOToEntity() {
 		return (input) -> {
 			Trip trip = new Trip();
+			trip.setId(input.getId());
 			trip.setTitle(input.getTitle());
 			trip.setDescription(input.getDescription());
 			trip.setLikes(input.getLikes());
@@ -153,6 +158,7 @@ public class BeansConfiguration {
 	@Scope("singleton")
 	public Mapper<Trip, TripRequestDTO> mapTripEntityToDTO() {
 		return (input) -> TripRequestDTO.builder()
+				.withId(input.getId())
 				.withTitle(input.getTitle())
 				.withDescription(input.getDescription())
 				.withLikes(input.getLikes())
@@ -170,20 +176,19 @@ public class BeansConfiguration {
 	@Bean
 	@Scope("singleton")
 	public Mapper<Trip, TripResponseDTO> tripToResponseDTO() {
-		return (input) -> {
-			TripResponseDTO tripResponseDTO = new TripResponseDTO();
-			tripResponseDTO.setTitle(input.getTitle());
-			tripResponseDTO.setDescription(input.getDescription());
-			tripResponseDTO.setLikes(input.getLikes());
-			tripResponseDTO.setStartDate(input.getStartDate());
-			tripResponseDTO.setEndDate(input.getEndDate());
-			tripResponseDTO.setStatus(input.getStatus());
-			tripResponseDTO.setPrivacy(input.getPrivacy());
-			tripResponseDTO.setUser(toRegisteredUserDTO(input.getUser()));
-			tripResponseDTO.setSteps(input.getSteps() != null ? input.getSteps().stream().map(this::toStepRequestDTO).collect(Collectors.toList()) : Collections.emptyList());
-			tripResponseDTO.setCoverImage(input.getCoverImage() != null ? toImageDTO(input.getCoverImage()) : null);
-			return tripResponseDTO;
-		};
+		return (input) -> TripResponseDTO.builder()
+				.withId(input.getId()) // Aggiungi l'ID qui
+				.withTitle(input.getTitle())
+				.withDescription(input.getDescription())
+				.withLikes(input.getLikes())
+				.withStartDate(input.getStartDate())
+				.withEndDate(input.getEndDate())
+				.withStatus(input.getStatus())
+				.withPrivacy(input.getPrivacy())
+				.withUser(toRegisteredUserDTO(input.getUser()))
+				.withSteps(input.getSteps() != null ? input.getSteps().stream().map(this::toStepRequestDTO).collect(Collectors.toList()) : Collections.emptyList())
+				.withCoverImage(input.getCoverImage() != null ? toImageDTO(input.getCoverImage()) : null)
+				.build();
 	}
 
 

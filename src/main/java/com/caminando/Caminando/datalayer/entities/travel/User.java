@@ -3,6 +3,7 @@ package com.caminando.Caminando.datalayer.entities.travel;
 import com.caminando.Caminando.datalayer.entities.Image;
 import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -51,14 +52,17 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @BatchSize(size = 10)
+    @JsonManagedReference
     private List<Trip> trips = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @BatchSize(size = 10)
+    @JsonManagedReference
     private List<SuggestItinerary> suggestItineraries = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id")
+    @JsonManagedReference
     private Image profileImage;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
@@ -71,4 +75,25 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Position> positions = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + getId() +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", bio='" + bio + '\'' +
+                ", city='" + city + '\'' +
+                ", follow=" + follow +
+                ", followers=" + followers +
+                ", isEnabled=" + isEnabled +
+                ", tripsCount=" + (trips != null ? trips.size() : 0) +
+                ", suggestItinerariesCount=" + (suggestItineraries != null ? suggestItineraries.size() : 0) +
+                ", roles=" + roles +
+                ", positionsCount=" + (positions != null ? positions.size() : 0) +
+                '}';
+    }
 }
+

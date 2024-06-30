@@ -69,6 +69,8 @@ public class UserServiceImpl implements UserService {
 
     @Value("${CLOUDINARY_URL}")
     private String cloudinaryUrl;
+
+
     @Override
     public RegisteredUserDTO register(RegisterUserDTO newUser) {
         var emailDuplicated = usersRepository.findByEmail(newUser.getEmail());
@@ -221,15 +223,11 @@ public class UserServiceImpl implements UserService {
     public User saveProfileImage(long id, MultipartFile file) throws IOException {
         var user = usersRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-
         var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
         String imageUrl = (String) uploadResult.get("url");
-
         Image image = new Image();
         image.setImageURL(imageUrl);
-
         user.setProfileImage(image);
-
         return usersRepository.save(user);
     }
 

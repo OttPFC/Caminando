@@ -17,6 +17,7 @@ import java.util.List;
 @Builder(setterPrefix = "with")
 public class TripRequestDTO extends BaseDTO {
 
+    private Long id;
     private String title;
     private String description;
     private Integer likes;
