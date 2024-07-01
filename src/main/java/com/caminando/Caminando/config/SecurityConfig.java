@@ -109,9 +109,11 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/place-to-stay/{id}").hasAuthority("ADMIN")
 						//ADMIN
 						.requestMatchers(HttpMethod.PUT, "/**").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").permitAll()
-						//---------------------------------------------------------------------------
+						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/trips/{id}/image").authenticated()
 
+						//---------------------------------------------------------------------------
+						.requestMatchers(HttpMethod.PATCH, "/api/trips/{id}/image").authenticated()
 						//ITINERARY
 						.requestMatchers(HttpMethod.PATCH, "/api/itinerary").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.PATCH, "/api/itinerary/{id}").hasAuthority("ADMIN")

@@ -10,6 +10,7 @@ import com.caminando.Caminando.datalayer.entities.enums.Status;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
+import com.caminando.Caminando.presentationlayer.api.exceptions.NotFoundException;
 import com.caminando.Caminando.presentationlayer.api.models.travel.TripModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/trips")
@@ -106,6 +110,18 @@ public class TripController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/{id}/image")
+    public ResponseEntity<TripResponseDTO> uploadTripImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            TripResponseDTO tripResponseDTO = tripService.saveImage(id, file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(tripResponseDTO);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

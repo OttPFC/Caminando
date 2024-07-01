@@ -16,6 +16,6 @@ public class CommentRequestDTO extends BaseDTO {
 
     private String text;
     private LocalDate date;
-    private StepRequestDTO step;
+    private StepResponseDTO step;
     private RegisteredUserDTO user;
 }

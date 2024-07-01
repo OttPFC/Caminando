@@ -1,25 +1,32 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
+import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.TripRequestDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.TripResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.TripService;
+import com.caminando.Caminando.datalayer.entities.Image;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.travel.TripRepository;
 import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.presentationlayer.api.exceptions.NotFoundException;
 import com.caminando.Caminando.presentationlayer.utility.EntityUtils;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -31,7 +38,8 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private Mapper<ImageDTO, Image> mapImageDTOToEntity;
     @Autowired
     private Mapper<TripRequestDTO, Trip> mapTripDTOToEntity;
 
@@ -40,7 +48,8 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private Mapper<User, RegisteredUserDTO> userEntityToUserDTOMapper;
-
+    @Value("${CLOUDINARY_URL}")
+    private String cloudinaryUrl;
     @Autowired
     private EntityUtils utils;
 
@@ -91,5 +100,23 @@ public class TripServiceImpl implements TripService {
     @Override
     public Trip getTripByIdAndUserId(Long tripId, Long userId) {
         return tripRepository.findByIdAndUserId(tripId, userId).orElse(null);
+    }
+
+    @Override
+    public TripResponseDTO saveImage(Long id, MultipartFile file) throws IOException {
+        Trip trip = tripRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+
+
+        Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+        var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String imageUrl = (String) uploadResult.get("url");
+
+        ImageDTO image = new ImageDTO();
+        image.setImageURL(imageUrl);
+        trip.setCoverImage(mapImageDTOToEntity.map(image));
+
+        tripRepository.save(trip);
+
+        return tripEntityToResponseMapper.map(trip);
     }
 }

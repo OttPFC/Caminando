@@ -62,7 +62,6 @@ public class User extends BaseEntity {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id")
-    @JsonManagedReference
     private Image profileImage;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)

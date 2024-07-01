@@ -18,7 +18,7 @@ public class PositionRequestDTO extends BaseDTO {
     private double longitude;
     private Instant timestamp;
     private String nomeLocalita;
-    private StepRequestDTO step;
+    private StepResponseDTO step;
     private RegisteredUserDTO user;
 
 }

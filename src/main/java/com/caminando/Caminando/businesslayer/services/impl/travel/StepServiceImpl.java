@@ -1,9 +1,6 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
-import com.caminando.Caminando.businesslayer.services.dto.travel.PositionRequestDTO;
-import com.caminando.Caminando.businesslayer.services.dto.travel.StepRequestDTO;
-import com.caminando.Caminando.businesslayer.services.dto.travel.StepResponseDTO;
-import com.caminando.Caminando.businesslayer.services.dto.travel.TripRequestDTO;
+import com.caminando.Caminando.businesslayer.services.dto.travel.*;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.StepService;
@@ -57,11 +54,17 @@ public class StepServiceImpl implements StepService {
     @Autowired
     private Mapper<User, RegisteredUserDTO> userEntityToUserDTOMapper;
 
+//    @Autowired
+//    private Mapper<Trip, TripRequestDTO> tripMapperToDTO;
     @Autowired
-    private Mapper<Trip, TripRequestDTO> tripMapperToDTO;
+    private Mapper<Trip, TripResponseDTO> tripMapperToDTOResponse;
 
     @Autowired
     private Mapper<Position, PositionRequestDTO> positionToDTO;
+
+    @Autowired
+    private Mapper<PositionRequestDTO, PositionResponseDTO> requestToResponse;
+
 
     @Override
     public Page<StepResponseDTO> getAll(Pageable pageable) {
@@ -133,10 +136,10 @@ public class StepServiceImpl implements StepService {
                 .withDescription(stepRequestDTO.getDescription())
                 .withArrivalDate(stepRequestDTO.getArrivalDate())
                 .withDepartureDate(stepRequestDTO.getDepartureDate())
-                .withTrip(tripMapperToDTO.map(trip))
+                .withTrip(tripMapperToDTOResponse.map(trip))
                 .withComments(new ArrayList<>())
                 .withImages(new ArrayList<>())
-                .withPosition(positionRequestDTO)
+                .withPosition(requestToResponse.map(positionRequestDTO))
                 .build();
 
         Step newStep = stepDTOToEntityMapper.map(newStepRequestDTO);

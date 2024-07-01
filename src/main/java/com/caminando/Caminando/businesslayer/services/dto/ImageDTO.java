@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder(setterPrefix = "with")
 public class ImageDTO extends BaseDTO{
-
+    private Long id;
     private String imageURL;
     private String description;
 }

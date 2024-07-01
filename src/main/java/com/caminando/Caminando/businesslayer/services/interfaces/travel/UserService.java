@@ -18,7 +18,7 @@ public interface UserService{
 
     RegisteredUserDTO getById(long id);
 
-    Page<User> getAll(Pageable p);
+    Page<RegisteredUserDTO> getAll(Pageable p);
 
     RegisteredUserDTO update(Long id, RegisteredUserDTO userDto);
 
@@ -27,5 +27,5 @@ public interface UserService{
     RegisteredUserDTO addRole(Long id, String role);
     RegisteredUserDTO removeRole(Long id, String role);
 
-    User saveProfileImage(long id, MultipartFile file) throws IOException;
+    RegisteredUserDTO saveProfileImage(long id, MultipartFile file) throws IOException;
 }

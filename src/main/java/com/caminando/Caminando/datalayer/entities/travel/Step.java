@@ -1,6 +1,8 @@
 package com.caminando.Caminando.datalayer.entities.travel;
 
 import com.caminando.Caminando.datalayer.entities.Image;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -31,16 +33,20 @@ public class Step extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id")
+    @JsonBackReference
     private Trip trip;
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     @BatchSize(size = 10)
     private List<Image> images = new ArrayList<>();
 
     @OneToOne(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private Position position;
 
 

@@ -32,11 +32,17 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+
     @GetMapping
-    public ResponseEntity<Page<User>> getUsers(Pageable pageable) {
-        Page<User> allUsers = userService.getAll(pageable);
+    public ResponseEntity<Page<RegisteredUserDTO>> getUsers(Pageable pageable) {
+        System.out.println("first try");
+        Page<RegisteredUserDTO> allUsers = userService.getAll(pageable);
+        System.out.println(allUsers);
+        System.out.println("first second");
         HttpHeaders headers = new HttpHeaders();
+        System.out.println("first tres");
         headers.add("Totale", String.valueOf(allUsers.getTotalElements()));
+        System.out.println("first four");
         return new ResponseEntity<>(allUsers, headers, HttpStatus.OK);
     }
 
@@ -134,11 +140,16 @@ public class UserController {
     }
 
     @PatchMapping("{id}/profile-image")
-    public User uploadProfileImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<RegisteredUserDTO> uploadProfileImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         try {
-            return userService.saveProfileImage(id, file);
+            RegisteredUserDTO updatedUser = userService.saveProfileImage(id, file);
+            return ResponseEntity.ok(updatedUser);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            // Gestione dell'eccezione: restituisce una risposta con codice 500 e il messaggio di errore
+            return ResponseEntity.status(500).body(null);
+        } catch (NotFoundException e) {
+            // Gestione dell'eccezione: restituisce una risposta con codice 404 e il messaggio di errore
+            return ResponseEntity.status(404).body(null);
         }
     }
 }

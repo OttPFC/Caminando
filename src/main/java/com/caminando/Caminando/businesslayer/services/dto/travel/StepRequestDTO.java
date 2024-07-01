@@ -2,6 +2,7 @@ package com.caminando.Caminando.businesslayer.services.dto.travel;
 
 import com.caminando.Caminando.businesslayer.services.dto.BaseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
+import com.caminando.Caminando.businesslayer.services.dto.ImageResponseDTO;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -18,8 +19,8 @@ public class StepRequestDTO extends BaseDTO {
     private Integer likes;
     private LocalDate arrivalDate;
     private LocalDate departureDate;
-    private TripRequestDTO trip;
-    private List<CommentRequestDTO> comments;
-    private List<ImageDTO> images;
-    private PositionRequestDTO position;
+    private TripResponseDTO trip;
+    private List<CommentResponseDTO> comments;
+    private List<ImageResponseDTO> images;
+    private PositionResponseDTO position;
 }

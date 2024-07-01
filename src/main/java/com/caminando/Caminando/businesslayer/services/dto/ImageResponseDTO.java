@@ -9,6 +9,7 @@ import lombok.*;
 @Builder(setterPrefix = "with")
 public class ImageResponseDTO extends BaseDTO{
 
+    private Long id;
     private String imageURL;
     private String description;
 }

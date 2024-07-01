@@ -21,8 +21,8 @@ public class PositionController {
     @Autowired
     private PositionService positionService;
 
-    @PostMapping("/step/{stepId}")
-    public ResponseEntity<?> savePosition(@PathVariable Long stepId, @RequestBody @Validated PositionModel model, BindingResult validator) {
+    @PostMapping
+    public ResponseEntity<?> savePosition(@RequestBody @Validated PositionModel model, BindingResult validator) {
         if (validator.hasErrors()) {
             return ResponseEntity.badRequest().body(validator.getAllErrors());
         }
