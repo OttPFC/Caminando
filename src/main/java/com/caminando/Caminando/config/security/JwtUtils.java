@@ -1,4 +1,4 @@
-package com.caminando.Caminando.config;
+package com.caminando.Caminando.config.security;
 
 import com.caminando.Caminando.businesslayer.services.security.SecurityUserDetails;
 import io.jsonwebtoken.Jwts;

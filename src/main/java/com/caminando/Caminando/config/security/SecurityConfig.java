@@ -1,4 +1,4 @@
-package com.caminando.Caminando.config;
+package com.caminando.Caminando.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

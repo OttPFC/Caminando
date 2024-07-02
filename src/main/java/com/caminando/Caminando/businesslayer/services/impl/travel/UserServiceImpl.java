@@ -5,7 +5,8 @@ import com.caminando.Caminando.businesslayer.services.dto.user.RegisterUserDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.UserService;
-import com.caminando.Caminando.config.JwtUtils;
+import com.caminando.Caminando.config.EmailConfig;
+import com.caminando.Caminando.config.security.JwtUtils;
 import com.caminando.Caminando.datalayer.entities.Image;
 import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.travel.User;
@@ -71,6 +72,8 @@ public class UserServiceImpl implements UserService {
     @Value("${CLOUDINARY_URL}")
     private String cloudinaryUrl;
 
+    @Autowired
+    EmailConfig emailConfig;
 
     @Override
     public RegisteredUserDTO register(RegisterUserDTO newUser) {
@@ -108,9 +111,10 @@ public class UserServiceImpl implements UserService {
                     );
                 }
                 userEntity.setEnabled(true);
+                userEntity.setFollow(0L);
+                userEntity.setFollowers(0L);
                 var u = mapRegisteredUser.map(usersRepository.save(userEntity));
-                // mailService.sendMail(newUser.getEmail(), "Registrazione avvenuta con successo",
-                //        newUser.getFirstName() + " " + newUser.getLastName() + " hai effettuato con successo la tua registrazione" );
+                emailConfig.sendMail(newUser.getEmail(), "Welcome!", "Thank you for registering!");
                 return u;
             } catch (Exception e) {
                 log.error(String.format("Exception saving user %s", usersRepository), e);

@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -43,11 +45,14 @@ public class UserBeansConfiguration {
                 .withRoles(input.getRoles())
                 .withEnabled(input.isEnabled())
                 .withImage(toImageDTO(input.getProfileImage()))
-                .withTrips(input.getTrips().stream()
+                .withTrips(Optional.ofNullable(input.getTrips())
+                        .orElseGet(Collections::emptyList)
+                        .stream()
                         .map(this::toTripDTO)
                         .collect(Collectors.toList()))
                 .build();
     }
+
 
     @Bean
     @Scope("singleton")

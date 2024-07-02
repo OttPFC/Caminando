@@ -1,6 +1,7 @@
-package com.caminando.Caminando.config;
+package com.caminando.Caminando.config.security;
 
 import com.caminando.Caminando.businesslayer.services.security.ApplicationUserDetailsService;
+import com.caminando.Caminando.config.security.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

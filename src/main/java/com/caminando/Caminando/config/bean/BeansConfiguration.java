@@ -1,4 +1,4 @@
-package com.caminando.Caminando.config;
+package com.caminando.Caminando.config.bean;
 
 import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
 import com.caminando.Caminando.businesslayer.services.dto.ImageResponseDTO;
