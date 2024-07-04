@@ -65,6 +65,11 @@ public class StepServiceImpl implements StepService {
     @Autowired
     private Mapper<PositionRequestDTO, PositionResponseDTO> requestToResponse;
 
+    @Autowired
+    private Mapper<PositionRequestDTO, Position> positionDTOToEntityMapper;
+
+    @Autowired
+    private Mapper<Position, PositionResponseDTO> positionEntityToDTOMapper;
 
     @Override
     public Page<StepResponseDTO> getAll(Pageable pageable) {
@@ -80,11 +85,34 @@ public class StepServiceImpl implements StepService {
 
     @Override
     @Transactional
-    public StepResponseDTO save(StepRequestDTO stepRequestDTO) {
+    public StepResponseDTO save(StepRequestDTO stepRequestDTO, Long tripId, PositionRequestDTO positionRequestDTO) {
+        // Find the trip and save if not already saved
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new EntityNotFoundException("Trip not found"));
+
+        // Map and save the position
+        Position position = positionDTOToEntityMapper.map(positionRequestDTO);
+        position = positionRepository.save(position);
+
+        // Map and save the step
         Step step = stepDTOToEntityMapper.map(stepRequestDTO);
-        Step savedStep = stepRepository.save(step);
-        return stepEntityToResponseMapper.map(savedStep);
+        step.setTrip(trip); // Ensure the step has the saved trip
+
+        step = stepRepository.save(step);
+
+        // Update position with the saved step
+        position.setStep(step);
+        position = positionRepository.save(position);
+
+        // Update step with the saved position
+        step.setPosition(position);
+        step = stepRepository.save(step);
+
+        return stepEntityToResponseMapper.map(step);
     }
+
+
+
 
     @Override
     @Transactional
@@ -114,41 +142,5 @@ public class StepServiceImpl implements StepService {
         }
         return null;
     }
-
-
-
-    @Override
-    @Transactional
-    public StepResponseDTO createStep(StepRequestDTO stepRequestDTO, Long tripId, Long positionId) {
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findOneByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Trip trip = tripRepository.findByIdAndUserId(tripId, user.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Trip not found or not accessible by this user"));
-
-        Position position = positionRepository.findById(positionId)
-                .orElseThrow(() -> new EntityNotFoundException("Position not found"));
-
-        PositionRequestDTO positionRequestDTO = positionToDTO.map(position);
-
-        StepRequestDTO newStepRequestDTO = StepRequestDTO.builder()
-                .withDescription(stepRequestDTO.getDescription())
-                .withArrivalDate(stepRequestDTO.getArrivalDate())
-                .withDepartureDate(stepRequestDTO.getDepartureDate())
-                .withTrip(tripMapperToDTOResponse.map(trip))
-                .withComments(new ArrayList<>())
-                .withImages(new ArrayList<>())
-                .withPosition(requestToResponse.map(positionRequestDTO))
-                .build();
-
-        Step newStep = stepDTOToEntityMapper.map(newStepRequestDTO);
-        trip.getSteps().add(newStep);
-
-        Step savedStep = stepRepository.save(newStep);
-        return stepEntityToResponseMapper.map(savedStep);
-    }
-
-
 }
 

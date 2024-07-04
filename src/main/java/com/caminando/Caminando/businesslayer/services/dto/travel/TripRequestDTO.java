@@ -24,6 +24,7 @@ public class TripRequestDTO extends BaseDTO {
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Integer likes;
     private Status status;
     private Privacy privacy;
     private RegisteredUserDTO user;

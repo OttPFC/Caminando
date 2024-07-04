@@ -53,11 +53,13 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @BatchSize(size = 10)
     @JsonManagedReference
+    @ToString.Exclude
     private List<Trip> trips = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @BatchSize(size = 10)
     @JsonManagedReference
+    @ToString.Exclude
     private List<SuggestItinerary> suggestItineraries = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -73,6 +75,7 @@ public class User extends BaseEntity {
     private List<RoleEntity> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Position> positions = new ArrayList<>();
 
     @Override

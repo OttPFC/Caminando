@@ -4,6 +4,7 @@ import com.caminando.Caminando.datalayer.entities.Image;
 import com.caminando.Caminando.datalayer.entities.enums.Privacy;
 import com.caminando.Caminando.datalayer.entities.enums.Status;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,13 +42,14 @@ public class Trip extends BaseEntity {
     @Column(nullable = false)
     private Privacy privacy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
-    @JsonBackReference
+    @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference(value = "trip-steps")
+    @JsonIgnore
     private List<Step> steps = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -59,7 +61,9 @@ public class Trip extends BaseEntity {
         this.steps.add(step);
         step.setTrip(this);
     }
-
+    public void setCoverImage(Image coverImage) {
+        this.coverImage = coverImage;
+    }
     @Override
     public String toString() {
         return "Trip{" +

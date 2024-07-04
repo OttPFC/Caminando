@@ -59,6 +59,7 @@ public class TripController {
                     .withDescription(model.description())
                     .withStartDate(model.startDate())
                     .withEndDate(model.endDate())
+                    .withLikes(0)
                     .withStatus(Status.valueOf(model.status()))
                     .withPrivacy(Privacy.valueOf(model.privacy()))
                     .withUser(userDTO)

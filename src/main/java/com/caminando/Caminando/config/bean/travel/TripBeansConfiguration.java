@@ -104,8 +104,8 @@ public class TripBeansConfiguration {
                 .withArrivalDate(step.getArrivalDate())
                 .withDepartureDate(step.getDepartureDate())
                 .withTrip(step.getTrip() != null ? toTripResponseDTO(step.getTrip()) : null)
-                .withComments(step.getComments().stream().map(this::toCommentResponseDTO).collect(Collectors.toList()))
-                .withImages(step.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()))
+                .withComments(step.getComments() != null ? step.getComments().stream().map(this::toCommentResponseDTO).collect(Collectors.toList()) : Collections.emptyList())
+                .withImages(step.getImages() != null ? step.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()) : Collections.emptyList())
                 .build();
     }
 
@@ -158,8 +158,8 @@ public class TripBeansConfiguration {
                 .withStatus(trip.getStatus())
                 .withPrivacy(trip.getPrivacy())
                 .withUser(toRegisteredUserDTO(trip.getUser()))
-                .withSteps(trip.getSteps().stream().map(this::toStepResponseDTO).collect(Collectors.toList()))
-                .withCoverImage(toImageDTO(trip.getCoverImage()))
+                .withSteps(trip.getSteps() != null ? trip.getSteps().stream().map(this::toStepResponseDTO).collect(Collectors.toList()) : Collections.emptyList())
+                .withCoverImage(trip.getCoverImage() != null ? toImageDTO(trip.getCoverImage()) : null)
                 .build();
     }
 

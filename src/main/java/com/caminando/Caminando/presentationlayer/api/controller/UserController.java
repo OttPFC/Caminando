@@ -65,7 +65,7 @@ public class UserController {
             throw new ApiValidationException(validator.getAllErrors());
         }
 
-        var registeredUser = userService.register(
+        RegisteredUserDTO registeredUser = userService.register(
                 RegisterUserDTO.builder()
                         .withFirstName(model.firstName())
                         .withLastName(model.lastName())

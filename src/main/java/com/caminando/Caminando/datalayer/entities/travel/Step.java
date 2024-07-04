@@ -31,22 +31,22 @@ public class Step extends BaseEntity {
     @Column(nullable = false)
     private LocalDate departureDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "trip_id")
-    @JsonBackReference
+    @JsonBackReference(value = "trip-steps")
     private Trip trip;
 
-    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference(value = "step-comments")
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference(value = "step-images")
     @BatchSize(size = 10)
     private List<Image> images = new ArrayList<>();
 
-    @OneToOne(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToOne(mappedBy = "step", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference(value = "step-position")
     private Position position;
 
 

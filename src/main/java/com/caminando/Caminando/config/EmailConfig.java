@@ -26,7 +26,7 @@ public class EmailConfig {
     }
 
     public void sendMail(String recipientEmail, String subject, String content) {
-        Email from = new Email("no-reply@yourdomain.com");
+        Email from = new Email("ale.maz097@gmail.com");
         Email to = new Email(recipientEmail);
         Content contentObj = new Content("text/plain", content);
         Mail mail = new Mail(from, subject, to, contentObj);

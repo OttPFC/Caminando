@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Service
 @Slf4j
@@ -41,7 +42,7 @@ public class PositionServiceImpl implements PositionService {
     private Mapper<Position, PositionResponseDTO> positionEntityToResponseMapper;
 
     @Autowired
-    private Mapper<Position, PositionRequestDTO> positionEntityToRequestDTOMapper;
+    private Mapper<Position, PositionRequestDTO> mapPositionEntityToRequestDTOMapper;
 
     @Override
     public Page<PositionResponseDTO> getAll(Pageable pageable) {
@@ -84,7 +85,7 @@ public class PositionServiceImpl implements PositionService {
     public PositionRequestDTO getNomeLocalitaAndTimestampById(Long id) {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Position not found with id: " + id));
-        return positionEntityToRequestDTOMapper.map(position);
+        return mapPositionEntityToRequestDTOMapper.map(position);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class PositionServiceImpl implements PositionService {
         PositionRequestDTO newPositionRequestDTO = PositionRequestDTO.builder()
                 .withLatitude(positionRequestDTO.getLatitude())
                 .withLongitude(positionRequestDTO.getLongitude())
-                .withTimestamp(Instant.now())
+                .withTimestamp(LocalDate.now())
                 .withNomeLocalita(positionRequestDTO.getNomeLocalita())
                 .withUser(userDTO)
                 .build();

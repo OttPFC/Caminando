@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -24,23 +25,23 @@ public class PositionBeansConfiguration {
                 .withLongitude(input.getLongitude())
                 .withTimestamp(input.getTimestamp())
                 .withNomeLocalita(input.getNomeLocalita())
-                .withStep(toStepRequestDTO(toStepEntity(input.getStep()))) // Modificato qui
+                .withUser(input.getUser())
+                .withStep(toStepRequestDTO(toStepEntity(input.getStep())))
                 .build();
     }
-
-
     @Bean
     @Scope("singleton")
-    public Mapper<PositionRequestDTO, Position> mapPositionDTOToEntity() {
-        return (input) -> Position.builder()
-                .withLatitude(input.getLatitude())
-                .withLongitude(input.getLongitude())
-                .withTimestamp(input.getTimestamp())
-                .withNomeLocalita(input.getNomeLocalita())
-                .withStep(toStepEntity(input.getStep()))
-                .build();
+    public Mapper<PositionResponseDTO, Position> mapPositionDTOToEntity() {
+        return (input) -> {
+            Position position = new Position();
+            position.setLatitude(input.getLatitude());
+            position.setLongitude(input.getLongitude());
+            position.setTimestamp(input.getTimestamp());
+            position.setNomeLocalita(input.getNomeLocalita());
+            position.setStep(input.getStep() != null ? toStepEntity(input.getStep()) : null);
+            return position;
+        };
     }
-
     @Bean
     @Scope("singleton")
     public Mapper<Position, PositionRequestDTO> mapPositionEntityToDTO() {
@@ -52,6 +53,19 @@ public class PositionBeansConfiguration {
                 .withStep(toStepRequestDTO(input.getStep()))
                 .build();
     }
+
+    @Bean
+    @Scope("singleton")
+    public Mapper<PositionRequestDTO, Position> positionRequestDTOToEntity() {
+        return (input) -> Position.builder()
+                .withLatitude(input.getLatitude())
+                .withLongitude(input.getLongitude())
+                .withTimestamp(input.getTimestamp())
+                .withNomeLocalita(input.getNomeLocalita())
+                .withStep(toStepEntity(input.getStep()))
+                .build();
+    }
+
     @Bean
     @Scope("singleton")
     public Mapper<Position, PositionResponseDTO> mapPositionEntityToResponse() {
@@ -90,7 +104,6 @@ public class PositionBeansConfiguration {
             return null;
         }
         return User.builder()
-
                 .withFirstName(userDTO.getFirstName())
                 .withLastName(userDTO.getLastName())
                 .withUsername(userDTO.getUsername())
@@ -124,33 +137,48 @@ public class PositionBeansConfiguration {
                 .withCoverImage(trip.getCoverImage() != null ? toImageDTO(trip.getCoverImage()) : null)
                 .build();
     }
-    private Trip toTripEntity(TripResponseDTO tripRequestDTO) {
+    private Trip toTripEntity(TripResponseDTO tripResponseDTO) {
         Trip trip = new Trip();
-        trip.setTitle(tripRequestDTO.getTitle());
-        trip.setDescription(tripRequestDTO.getDescription());
-
-        trip.setStartDate(tripRequestDTO.getStartDate());
-        trip.setEndDate(tripRequestDTO.getEndDate());
-        trip.setStatus(tripRequestDTO.getStatus());
-        trip.setPrivacy(tripRequestDTO.getPrivacy());
-        trip.setUser(tripRequestDTO.getUser() != null ? toUserEntity(tripRequestDTO.getUser()) : null);
-        trip.setSteps(tripRequestDTO.getSteps() != null ? tripRequestDTO.getSteps().stream().map(this::toStepEntity).collect(Collectors.toList()) : null);
-        trip.setCoverImage(tripRequestDTO.getCoverImage() != null ? toImageEntity(tripRequestDTO.getCoverImage()) : null);
+        trip.setTitle(tripResponseDTO.getTitle());
+        trip.setDescription(tripResponseDTO.getDescription());
+        trip.setStartDate(tripResponseDTO.getStartDate());
+        trip.setEndDate(tripResponseDTO.getEndDate());
+        trip.setStatus(tripResponseDTO.getStatus());
+        trip.setPrivacy(tripResponseDTO.getPrivacy());
+        trip.setUser(tripResponseDTO.getUser() != null ? toUserEntity(tripResponseDTO.getUser()) : null);
+        trip.setSteps(tripResponseDTO.getSteps() != null ? tripResponseDTO.getSteps().stream().map(this::toStepEntity).collect(Collectors.toList()) : null);
+        trip.setCoverImage(tripResponseDTO.getCoverImage() != null ? toImageEntity(tripResponseDTO.getCoverImage()) : null);
         return trip;
     }
-    private Step toStepEntity(StepResponseDTO stepRequestDTO) {
+    private Step toStepEntity(StepResponseDTO stepResponseDTO) {
+        if (stepResponseDTO == null) {
+            return null;
+        }
+
         Step step = new Step();
-        step.setDescription(stepRequestDTO.getDescription());
-        step.setLikes(stepRequestDTO.getLikes());
-        step.setArrivalDate(stepRequestDTO.getArrivalDate());
-        step.setDepartureDate(stepRequestDTO.getDepartureDate());
-        step.setTrip(stepRequestDTO.getTrip() != null ? toTripEntity(stepRequestDTO.getTrip()) : null);
-        step.setComments(stepRequestDTO.getComments().stream().map(this::toCommentEntity).collect(Collectors.toList()));
-        step.setImages(stepRequestDTO.getImages().stream().map(this::toImageEntity).collect(Collectors.toList()));
+        step.setDescription(stepResponseDTO.getDescription());
+        step.setLikes(stepResponseDTO.getLikes());
+        step.setArrivalDate(stepResponseDTO.getArrivalDate());
+        step.setDepartureDate(stepResponseDTO.getDepartureDate());
+        step.setTrip(stepResponseDTO.getTrip() != null ? toTripEntity(stepResponseDTO.getTrip()) : null);
+
+        // Handle null comments and images
+        step.setComments(stepResponseDTO.getComments() != null
+                ? stepResponseDTO.getComments().stream().map(this::toCommentEntity).collect(Collectors.toList())
+                : new ArrayList<>());
+
+        step.setImages(stepResponseDTO.getImages() != null
+                ? stepResponseDTO.getImages().stream().map(this::toImageEntity).collect(Collectors.toList())
+                : new ArrayList<>());
+
         return step;
     }
 
     private StepResponseDTO toStepRequestDTO(Step step) {
+        if (step == null) {
+            return null;
+        }
+
         return StepResponseDTO.builder()
                 .withDescription(step.getDescription())
                 .withLikes(step.getLikes())
@@ -161,15 +189,14 @@ public class PositionBeansConfiguration {
                 .withImages(step.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()))
                 .build();
     }
-    private Comment toCommentEntity(CommentResponseDTO commentRequestDTO) {
+    private Comment toCommentEntity(CommentResponseDTO commentResponseDTO) {
         Comment comment = new Comment();
-        comment.setText(commentRequestDTO.getText());
-        comment.setDate(commentRequestDTO.getDate());
-        comment.setStep(commentRequestDTO.getStep() != null ? toStepEntity(commentRequestDTO.getStep()) : null);
-        comment.setUser(commentRequestDTO.getUser() != null ? toUserEntity(commentRequestDTO.getUser()) : null);
+        comment.setText(commentResponseDTO.getText());
+        comment.setDate(commentResponseDTO.getDate());
+        comment.setStep(commentResponseDTO.getStep() != null ? toStepEntity(commentResponseDTO.getStep()) : null);
+        comment.setUser(commentResponseDTO.getUser() != null ? toUserEntity(commentResponseDTO.getUser()) : null);
         return comment;
     }
-
     private CommentResponseDTO toCommentRequestDTO(Comment comment) {
         return CommentResponseDTO.builder()
                 .withText(comment.getText())
@@ -187,7 +214,6 @@ public class PositionBeansConfiguration {
         image.setDescription(imageResponseDTO.getDescription());
         return image;
     }
-
     private ImageResponseDTO toImageDTO(Image image) {
         if (image == null) {
             return null;

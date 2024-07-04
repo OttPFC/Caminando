@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -20,7 +21,7 @@ public class Position extends BaseEntity {
     @Column(nullable = false)
     private double longitude;
 
-    private Instant timestamp;
+    private LocalDate timestamp;
 
     @Column(length = 50, nullable = false)
     private String nomeLocalita;

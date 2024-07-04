@@ -1,12 +1,14 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
 import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
+import com.caminando.Caminando.businesslayer.services.dto.ImageResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.TripRequestDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.TripResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.TripService;
 import com.caminando.Caminando.datalayer.entities.Image;
+import com.caminando.Caminando.datalayer.entities.travel.Step;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import com.caminando.Caminando.datalayer.repositories.travel.TripRepository;
@@ -40,6 +42,8 @@ public class TripServiceImpl implements TripService {
     private UserRepository userRepository;
     @Autowired
     private Mapper<ImageDTO, Image> mapImageDTOToEntity;
+    @Autowired
+    private Mapper<ImageResponseDTO, Image> responseToEntity;
     @Autowired
     private Mapper<TripRequestDTO, Trip> mapTripDTOToEntity;
 
@@ -83,11 +87,53 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public TripResponseDTO update(Long id, TripRequestDTO tripRequestDTO) {
-        Trip existingTrip = tripRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
-        utils.copy(tripRequestDTO, existingTrip);
+        // Recupera il trip esistente dal repository
+        Trip existingTrip = tripRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id));
+
+        // Recupera l'utente attuale
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findOneByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Verifica se l'utente attuale è il proprietario del trip
+        if (!existingTrip.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("User not authorized to update this trip");
+        }
+
+        // Mappa i valori dal TripRequestDTO all'entità Trip esistente
+        existingTrip.setTitle(tripRequestDTO.getTitle());
+        existingTrip.setDescription(tripRequestDTO.getDescription());
+        existingTrip.setStartDate(tripRequestDTO.getStartDate());
+        existingTrip.setEndDate(tripRequestDTO.getEndDate());
+        existingTrip.setLikes(tripRequestDTO.getLikes());
+        existingTrip.setStatus(tripRequestDTO.getStatus());
+        existingTrip.setPrivacy(tripRequestDTO.getPrivacy());
+
+        // Se ci sono delle steps, mappa e aggiungile al trip
+        if (tripRequestDTO.getSteps() != null) {
+            existingTrip.getSteps().clear();
+            tripRequestDTO.getSteps().forEach(stepDTO -> {
+                Step step = new Step(); // supponiamo che ci sia un mapper o costruttore adeguato per creare Step da StepDTO
+                // mappa i campi dello stepDTO allo step
+                existingTrip.addStep(step);
+            });
+        }
+
+        // Se c'è un'immagine di copertina aggiornata, mappala e impostala
+        if (tripRequestDTO.getCoverImage() != null) {
+            Image coverImage = responseToEntity.map(tripRequestDTO.getCoverImage());
+            existingTrip.setCoverImage(coverImage);
+        }
+
+        // Salva le modifiche
         Trip updatedTrip = tripRepository.save(existingTrip);
+
+        // Restituisci il TripResponseDTO mappato dall'entità aggiornata
         return tripEntityToResponseMapper.map(updatedTrip);
     }
+
+
 
     @Override
     @Transactional

@@ -5,6 +5,7 @@ import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -15,7 +16,7 @@ public class PositionResponseDTO extends BaseDTO {
 
     private double latitude;
     private double longitude;
-    private Instant timestamp;
+    private LocalDate timestamp;
     private String nomeLocalita;
     private StepResponseDTO step;
     private RegisteredUserDTO user;

@@ -62,12 +62,15 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/trips").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/trips/{id}").authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/steps").authenticated()
+
 						//ADMIN
 						.requestMatchers(HttpMethod.GET, "/**").hasAuthority("ADMIN")
 						// ------------------------------------------------------------------------
 						.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/trips").authenticated()
+						.requestMatchers(HttpMethod.POST, "/api/steps/create").authenticated()
 						//ITINERARY
 						.requestMatchers(HttpMethod.POST, "/api/itinerary").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.POST, "/api/itinerary/{id}").hasAuthority("ADMIN")
@@ -109,11 +112,14 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/place-to-stay/{id}").hasAuthority("ADMIN")
 						//ADMIN
 						.requestMatchers(HttpMethod.PUT, "/**").hasAuthority("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").hasAuthority("USER")
 						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/trips/{id}/image").authenticated()
-
+						.requestMatchers(HttpMethod.PUT,"/api/trips/{id}").authenticated()
 						//---------------------------------------------------------------------------
+						.requestMatchers(HttpMethod.PATCH, "/api/user/{id}/profile-image").authenticated()
 						.requestMatchers(HttpMethod.PATCH, "/api/trips/{id}/image").authenticated()
+
 						//ITINERARY
 						.requestMatchers(HttpMethod.PATCH, "/api/itinerary").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.PATCH, "/api/itinerary/{id}").hasAuthority("ADMIN")

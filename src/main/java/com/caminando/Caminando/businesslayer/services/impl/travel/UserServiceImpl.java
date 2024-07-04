@@ -29,6 +29,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -76,6 +77,7 @@ public class UserServiceImpl implements UserService {
     EmailConfig emailConfig;
 
     @Override
+    @Transactional
     public RegisteredUserDTO register(RegisterUserDTO newUser) {
         var emailDuplicated = usersRepository.findByEmail(newUser.getEmail());
         var usernameDuplicated = usersRepository.findOneByUsername(newUser.getUsername());
@@ -113,6 +115,7 @@ public class UserServiceImpl implements UserService {
                 userEntity.setEnabled(true);
                 userEntity.setFollow(0L);
                 userEntity.setFollowers(0L);
+
                 var u = mapRegisteredUser.map(usersRepository.save(userEntity));
                 emailConfig.sendMail(newUser.getEmail(), "Welcome!", "Thank you for registering!");
                 return u;
@@ -163,6 +166,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getUsername() != null) user.setUsername(userDto.getUsername());
         if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
         if (userDto.getCity() != null) user.setCity(userDto.getCity());
+        if (userDto.getBio() !=null) user.setBio(userDto.getBio());
         if (userDto.getPassword() != null) user.setPassword(userDto.getPassword());
         if (userDto.getRoles() != null) user.setRoles(userDto.getRoles());
         user.setEnabled(userDto.isEnabled());
