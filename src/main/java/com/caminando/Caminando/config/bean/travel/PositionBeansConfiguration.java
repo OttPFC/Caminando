@@ -4,8 +4,10 @@ import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
 import com.caminando.Caminando.businesslayer.services.dto.ImageResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.*;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RolesResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.datalayer.entities.Image;
+import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.travel.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,6 +72,7 @@ public class PositionBeansConfiguration {
     @Scope("singleton")
     public Mapper<Position, PositionResponseDTO> mapPositionEntityToResponse() {
         return (input) -> PositionResponseDTO.builder()
+                .withId(input.getId())
                 .withLatitude(input.getLatitude())
                 .withLongitude(input.getLongitude())
                 .withTimestamp(input.getTimestamp())
@@ -109,7 +112,7 @@ public class PositionBeansConfiguration {
                 .withUsername(userDTO.getUsername())
                 .withCity(userDTO.getCity())
                 .withEmail(userDTO.getEmail())
-                .withRoles(userDTO.getRoles())
+                .withRoles(userDTO.getRoles().stream().map(this::toRoleEntity).collect(Collectors.toList()))
                 .build();
     }
     private RegisteredUserDTO toRegisteredUserDTO(User user) {
@@ -120,7 +123,7 @@ public class PositionBeansConfiguration {
                 .withUsername(user.getUsername())
                 .withCity(user.getCity())
                 .withEmail(user.getEmail())
-                .withRoles(user.getRoles())
+                .withRoles(user.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                 .build();
     }
     private TripResponseDTO toTripDTO(Trip trip) {
@@ -222,5 +225,23 @@ public class PositionBeansConfiguration {
                 .withImageURL(image.getImageURL())
                 .withDescription(image.getDescription())
                 .build();
+    }
+
+    private RolesResponseDTO toRoleDTO(RoleEntity roleEntity) {
+        if (roleEntity == null) {
+            return null;
+        }
+        return RolesResponseDTO.builder()
+                .withRoleType(roleEntity.getRoleType())
+                .build();
+    }
+
+    private RoleEntity toRoleEntity(RolesResponseDTO roleDTO) {
+        if (roleDTO == null) {
+            return null;
+        }
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setRoleType(roleDTO.getRoleType());
+        return roleEntity;
     }
 }

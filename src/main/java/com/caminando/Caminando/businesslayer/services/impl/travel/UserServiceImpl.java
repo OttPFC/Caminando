@@ -1,8 +1,6 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
-import com.caminando.Caminando.businesslayer.services.dto.user.LoginResponseDTO;
-import com.caminando.Caminando.businesslayer.services.dto.user.RegisterUserDTO;
-import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.*;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.UserService;
 import com.caminando.Caminando.config.EmailConfig;
@@ -33,10 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -69,7 +65,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     Mapper<User, LoginResponseDTO> mapLogin;
 
+    @Autowired
+    Mapper<List<RoleEntity>, List<RolesResponseDTO>> mapRoleEntityListToDTOList;
 
+    @Autowired
+    Mapper<List<RolesResponseDTO>, List<RoleEntity>> mapRoleDTOListToEntityList;
     @Value("${CLOUDINARY_URL}")
     private String cloudinaryUrl;
 
@@ -155,20 +155,20 @@ public class UserServiceImpl implements UserService {
         return usersRepository.findAll(pageable).map(mapRegisteredUser::map);
     }
 
+
     @Override
     public RegisteredUserDTO update(Long id, RegisteredUserDTO userDto) {
         User user = usersRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(id));
 
-        // Aggiorna solo i campi presenti in userDto
         if (userDto.getFirstName() != null) user.setFirstName(userDto.getFirstName());
         if (userDto.getLastName() != null) user.setLastName(userDto.getLastName());
         if (userDto.getUsername() != null) user.setUsername(userDto.getUsername());
         if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
         if (userDto.getCity() != null) user.setCity(userDto.getCity());
-        if (userDto.getBio() !=null) user.setBio(userDto.getBio());
-        if (userDto.getPassword() != null) user.setPassword(userDto.getPassword());
-        if (userDto.getRoles() != null) user.setRoles(userDto.getRoles());
+        if (userDto.getBio() != null) user.setBio(userDto.getBio());
+        if (userDto.getPassword() != null) user.setPassword(encoder.encode(userDto.getPassword()));
+        if (userDto.getRoles() != null) user.setRoles(mapRoleDTOListToEntityList.map(userDto.getRoles()));
         user.setEnabled(userDto.isEnabled());
 
         User updatedUser = usersRepository.save(user);

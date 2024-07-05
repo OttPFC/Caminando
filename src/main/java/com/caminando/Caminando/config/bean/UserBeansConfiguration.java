@@ -5,8 +5,10 @@ import com.caminando.Caminando.businesslayer.services.dto.travel.TripResponseDTO
 import com.caminando.Caminando.businesslayer.services.dto.user.LoginResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisterUserDTO;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RolesResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.datalayer.entities.Image;
+import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
 import com.caminando.Caminando.datalayer.entities.travel.User;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +45,7 @@ public class UserBeansConfiguration {
                 .withBio(input.getBio())
                 .withCity(input.getCity())
                 .withEmail(input.getEmail())
-                .withRoles(input.getRoles())
+                .withRoles(input.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                 .withEnabled(input.isEnabled())
                 .withImage(toImageDTO(input.getProfileImage()))
                 .withTrips(Optional.ofNullable(input.getTrips())
@@ -67,7 +69,7 @@ public class UserBeansConfiguration {
                 .withPassword(input.getPassword())
                 .withBio(input.getBio())
                 .withIsEnabled(input.isEnabled())
-                .withRoles(input.getRoles())
+                .withRoles(input.getRoles().stream().map(this::toRoleEntity).collect(Collectors.toList()))
                 .withFollow(input.getFollow())
                 .withFollowers(input.getFollowers())
                 .withProfileImage(toImageEntity(input.getImage()))
@@ -87,7 +89,7 @@ public class UserBeansConfiguration {
                         .withLastName(input.getLastName())
                         .withUsername(input.getUsername())
                         .withEmail(input.getEmail())
-                        .withRoles(input.getRoles())
+                        .withRoles(input.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                         .withEnabled(input.isEnabled())
                         .build())
                 .build();
@@ -101,7 +103,7 @@ public class UserBeansConfiguration {
                 .withUsername(user.getUsername())
                 .withCity(user.getCity())
                 .withEmail(user.getEmail())
-                .withRoles(user.getRoles())
+                .withRoles(user.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                 .withBio(user.getBio())
                 .withEnabled(user.isEnabled())
                 .withImage(toImageDTO(user.getProfileImage()))
@@ -121,7 +123,7 @@ public class UserBeansConfiguration {
                 .withUsername(userDTO.getUsername())
                 .withCity(userDTO.getCity())
                 .withEmail(userDTO.getEmail())
-                .withRoles(userDTO.getRoles())
+                .withRoles(userDTO.getRoles().stream().map(this::toRoleEntity).collect(Collectors.toList()))
                 .withBio(userDTO.getBio())
                 .withProfileImage(toImageEntity(userDTO.getImage()))
                 .withTrips(userDTO.getTrips().stream()
@@ -181,4 +183,23 @@ public class UserBeansConfiguration {
                 .withCoverImage(toImageEntity(tripDTO.getCoverImage()))
                 .build();
     }
+
+    private RolesResponseDTO toRoleDTO(RoleEntity roleEntity) {
+        if (roleEntity == null) {
+            return null;
+        }
+        return RolesResponseDTO.builder()
+                .withRoleType(roleEntity.getRoleType())
+                .build();
+    }
+
+    private RoleEntity toRoleEntity(RolesResponseDTO roleDTO) {
+        if (roleDTO == null) {
+            return null;
+        }
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setRoleType(roleDTO.getRoleType());
+        return roleEntity;
+    }
+
 }

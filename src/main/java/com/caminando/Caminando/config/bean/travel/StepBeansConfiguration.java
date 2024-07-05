@@ -3,8 +3,10 @@ package com.caminando.Caminando.config.bean.travel;
 import com.caminando.Caminando.businesslayer.services.dto.ImageResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.*;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RolesResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.datalayer.entities.Image;
+import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.travel.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +28,7 @@ public class StepBeansConfiguration {
                 .withLikes(input.getLikes())
                 .withArrivalDate(input.getArrivalDate())
                 .withDepartureDate(input.getDepartureDate())
-                .withTrip(input.getTrip())
+                .withTrip(input.getTrip() != null ? TripResponseDTO.builder().withId(input.getTrip().getId()).build() : null)
                 .withComments(input.getComments())
                 .withImages(input.getImages())
                 .withPosition(input.getPosition())
@@ -41,7 +43,7 @@ public class StepBeansConfiguration {
                 .withLikes(input.getLikes())
                 .withArrivalDate(input.getArrivalDate())
                 .withDepartureDate(input.getDepartureDate())
-                .withTrip(input.getTrip())
+                .withTrip(input.getTrip() != null ? TripResponseDTO.builder().withId(input.getTrip().getId()).build() : null)
                 .withComments(input.getComments())
                 .withImages(input.getImages())
                 .withPosition(input.getPosition())
@@ -72,7 +74,7 @@ public class StepBeansConfiguration {
                 .withLikes(input.getLikes())
                 .withArrivalDate(input.getArrivalDate())
                 .withDepartureDate(input.getDepartureDate())
-                .withTrip(toTripDTO(input.getTrip()))
+                .withTrip(input.getTrip() != null ? TripResponseDTO.builder().withId(input.getTrip().getId()).build() : null)
                 .withComments(input.getComments() != null ? input.getComments().stream().map(this::toCommentRequestDTO).collect(Collectors.toList()) : new ArrayList<>())
                 .withImages(input.getImages() != null ? input.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()) : new ArrayList<>())
                 .withPosition(input.getPosition() != null ? toPositionDTO(input.getPosition()) : null)
@@ -83,11 +85,12 @@ public class StepBeansConfiguration {
     @Scope("singleton")
     public Mapper<Step, StepResponseDTO> mapStepEntityToResponse() {
         return (input) -> StepResponseDTO.builder()
+                .withId(input.getId())
                 .withDescription(input.getDescription())
                 .withLikes(input.getLikes())
                 .withArrivalDate(input.getArrivalDate())
                 .withDepartureDate(input.getDepartureDate())
-                .withTrip(toTripDTO(input.getTrip()))
+                .withTrip(input.getTrip() != null ? TripResponseDTO.builder().withId(input.getTrip().getId()).build() : null)
                 .withComments(input.getComments() != null ? input.getComments().stream().map(this::toCommentResponseDTO).collect(Collectors.toList()) : new ArrayList<>())
                 .withImages(input.getImages() != null ? input.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()) : new ArrayList<>())
                 .withPosition(input.getPosition() != null ? toPositionDTO(input.getPosition()) : null)
@@ -99,8 +102,13 @@ public class StepBeansConfiguration {
 
 
 
+
     private Trip toTripEntity(TripResponseDTO tripResponseDTO) {
+        if (tripResponseDTO == null) {
+            return null;
+        }
         Trip trip = new Trip();
+        trip.setId(tripResponseDTO.getId());
         trip.setTitle(tripResponseDTO.getTitle());
         trip.setDescription(tripResponseDTO.getDescription());
         trip.setStartDate(tripResponseDTO.getStartDate());
@@ -123,11 +131,14 @@ public class StepBeansConfiguration {
                 .withUsername(userDTO.getUsername())
                 .withCity(userDTO.getCity())
                 .withEmail(userDTO.getEmail())
-                .withRoles(userDTO.getRoles())
+                .withRoles(userDTO.getRoles().stream().map(this::toRoleEntity).collect(Collectors.toList()))
                 .build();
     }
 
     private RegisteredUserDTO toRegisteredUserDTO(User user) {
+        if (user == null) {
+            return null;
+        }
         return RegisteredUserDTO.builder()
                 .withId(user.getId())
                 .withFirstName(user.getFirstName())
@@ -135,12 +146,16 @@ public class StepBeansConfiguration {
                 .withUsername(user.getUsername())
                 .withCity(user.getCity())
                 .withEmail(user.getEmail())
-                .withRoles(user.getRoles())
+                .withRoles(user.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                 .build();
     }
 
     private TripResponseDTO toTripDTO(Trip trip) {
+        if (trip == null) {
+            return null;
+        }
         return TripResponseDTO.builder()
+                .withId(trip.getId())
                 .withTitle(trip.getTitle())
                 .withDescription(trip.getDescription())
                 .withStartDate(trip.getStartDate())
@@ -148,13 +163,13 @@ public class StepBeansConfiguration {
                 .withStatus(trip.getStatus())
                 .withPrivacy(trip.getPrivacy())
                 .withUser(trip.getUser() != null ? toRegisteredUserDTO(trip.getUser()) : null)
-                .withSteps(trip.getSteps() != null ? trip.getSteps().stream().map(this::toStepResponseDTO).collect(Collectors.toList()) : null)
+                .withSteps(trip.getSteps() != null ? trip.getSteps().stream().map(step -> StepResponseDTO.builder().withId(step.getId()).build()).collect(Collectors.toList()) : null)
                 .withCoverImage(trip.getCoverImage() != null ? toImageDTO(trip.getCoverImage()) : null)
                 .build();
     }
 
-    private StepResponseDTO toStepRequestDTO(Step step) {
-        return StepResponseDTO.builder()
+    private StepRequestDTO toStepRequestDTO(Step step) {
+        return StepRequestDTO.builder()
                 .withDescription(step.getDescription())
                 .withLikes(step.getLikes())
                 .withArrivalDate(step.getArrivalDate())
@@ -164,6 +179,7 @@ public class StepBeansConfiguration {
                 .withImages(step.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()))
                 .build();
     }
+
 
     private StepResponseDTO toStepResponseDTO(Step step) {
         return StepResponseDTO.builder()
@@ -178,18 +194,25 @@ public class StepBeansConfiguration {
     }
 
     private Step toStepEntity(StepResponseDTO stepResponseDTO) {
+        if (stepResponseDTO == null) {
+            return null;
+        }
         Step step = new Step();
+        step.setId(stepResponseDTO.getId());
         step.setDescription(stepResponseDTO.getDescription());
         step.setLikes(stepResponseDTO.getLikes());
         step.setArrivalDate(stepResponseDTO.getArrivalDate());
         step.setDepartureDate(stepResponseDTO.getDepartureDate());
-        step.setTrip(stepResponseDTO.getTrip() != null ? toTripEntity(stepResponseDTO.getTrip()) : null);
-        step.setComments(stepResponseDTO.getComments().stream().map(this::toCommentEntity).collect(Collectors.toList()));
-        step.setImages(stepResponseDTO.getImages().stream().map(this::toImageEntity).collect(Collectors.toList()));
+        step.setTrip(stepResponseDTO.getTrip() != null ? Trip.builder().withId(stepResponseDTO.getTrip().getId()).build() : null);
+        step.setComments(stepResponseDTO.getComments() != null ? stepResponseDTO.getComments().stream().map(this::toCommentEntity).collect(Collectors.toList()) : new ArrayList<>());
+        step.setImages(stepResponseDTO.getImages() != null ? stepResponseDTO.getImages().stream().map(this::toImageEntity).collect(Collectors.toList()) : new ArrayList<>());
         return step;
     }
 
     private Position toPositionEntity(PositionResponseDTO positionResponseDTO) {
+        if (positionResponseDTO == null) {
+            return null;
+        }
         Position position = new Position();
         position.setLatitude(positionResponseDTO.getLatitude());
         position.setLongitude(positionResponseDTO.getLongitude());
@@ -199,6 +222,9 @@ public class StepBeansConfiguration {
     }
 
     private PositionResponseDTO toPositionDTO(Position position) {
+        if (position == null) {
+            return null;
+        }
         return PositionResponseDTO.builder()
                 .withLatitude(position.getLatitude())
                 .withLongitude(position.getLongitude())
@@ -220,7 +246,7 @@ public class StepBeansConfiguration {
         return CommentResponseDTO.builder()
                 .withText(comment.getText())
                 .withDate(comment.getDate())
-                .withStep(comment.getStep() != null ? toStepRequestDTO(comment.getStep()) : null)
+                .withStep(comment.getStep() != null ? toStepResponseDTO(comment.getStep()) : null)
                 .withUser(comment.getUser() != null ? toRegisteredUserDTO(comment.getUser()) : null)
                 .build();
     }
@@ -252,5 +278,23 @@ public class StepBeansConfiguration {
                 .withImageURL(image.getImageURL())
                 .withDescription(image.getDescription())
                 .build();
+    }
+
+    private RolesResponseDTO toRoleDTO(RoleEntity roleEntity) {
+        if (roleEntity == null) {
+            return null;
+        }
+        return RolesResponseDTO.builder()
+                .withRoleType(roleEntity.getRoleType())
+                .build();
+    }
+
+    private RoleEntity toRoleEntity(RolesResponseDTO roleDTO) {
+        if (roleDTO == null) {
+            return null;
+        }
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setRoleType(roleDTO.getRoleType());
+        return roleEntity;
     }
 }

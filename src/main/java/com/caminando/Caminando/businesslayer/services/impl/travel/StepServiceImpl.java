@@ -1,9 +1,11 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
+import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.*;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.businesslayer.services.interfaces.travel.StepService;
+import com.caminando.Caminando.datalayer.entities.Image;
 import com.caminando.Caminando.datalayer.entities.travel.Position;
 import com.caminando.Caminando.datalayer.entities.travel.Step;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
@@ -12,18 +14,25 @@ import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.datalayer.repositories.travel.PositionRepository;
 import com.caminando.Caminando.datalayer.repositories.travel.StepRepository;
 import com.caminando.Caminando.datalayer.repositories.travel.TripRepository;
+import com.caminando.Caminando.presentationlayer.api.exceptions.NotFoundException;
 import com.caminando.Caminando.presentationlayer.api.models.travel.StepModel;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,9 +41,6 @@ public class StepServiceImpl implements StepService {
 
     @Autowired
     private StepRepository stepRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private TripRepository tripRepository;
@@ -46,30 +52,22 @@ public class StepServiceImpl implements StepService {
     private Mapper<StepRequestDTO, Step> stepDTOToEntityMapper;
 
     @Autowired
-    private Mapper<Step, StepRequestDTO> stepEntityToDTOMapper;
+    private Mapper<ImageDTO, Image> mapImageDTOToEntity;
 
     @Autowired
     private Mapper<Step, StepResponseDTO> stepEntityToResponseMapper;
 
-    @Autowired
-    private Mapper<User, RegisteredUserDTO> userEntityToUserDTOMapper;
 
-//    @Autowired
-//    private Mapper<Trip, TripRequestDTO> tripMapperToDTO;
     @Autowired
     private Mapper<Trip, TripResponseDTO> tripMapperToDTOResponse;
 
-    @Autowired
-    private Mapper<Position, PositionRequestDTO> positionToDTO;
-
-    @Autowired
-    private Mapper<PositionRequestDTO, PositionResponseDTO> requestToResponse;
 
     @Autowired
     private Mapper<PositionRequestDTO, Position> positionDTOToEntityMapper;
 
-    @Autowired
-    private Mapper<Position, PositionResponseDTO> positionEntityToDTOMapper;
+
+    @Value("${CLOUDINARY_URL}")
+    private String cloudinaryUrl;
 
     @Override
     public Page<StepResponseDTO> getAll(Pageable pageable) {
@@ -86,7 +84,7 @@ public class StepServiceImpl implements StepService {
     @Override
     @Transactional
     public StepResponseDTO save(StepRequestDTO stepRequestDTO, Long tripId, PositionRequestDTO positionRequestDTO) {
-        // Find the trip and save if not already saved
+        // Find the trip and ensure it exists
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new EntityNotFoundException("Trip not found"));
 
@@ -97,21 +95,16 @@ public class StepServiceImpl implements StepService {
         // Map and save the step
         Step step = stepDTOToEntityMapper.map(stepRequestDTO);
         step.setTrip(trip); // Ensure the step has the saved trip
+        step.setPosition(position); // Link the saved position to the step
 
         step = stepRepository.save(step);
 
-        // Update position with the saved step
+        // Update position with the saved step (if necessary)
         position.setStep(step);
-        position = positionRepository.save(position);
-
-        // Update step with the saved position
-        step.setPosition(position);
-        step = stepRepository.save(step);
+        positionRepository.save(position);
 
         return stepEntityToResponseMapper.map(step);
     }
-
-
 
 
     @Override
@@ -142,5 +135,48 @@ public class StepServiceImpl implements StepService {
         }
         return null;
     }
+
+
+    @Override
+    public StepResponseDTO saveImage(Long id, MultipartFile file) throws IOException {
+        Step step = stepRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+
+        Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+        var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String imageUrl = (String) uploadResult.get("url");
+
+        if (imageUrl == null) {
+            throw new IOException("Failed to upload image to Cloudinary");
+        }
+
+        ImageDTO imageDTO = new ImageDTO();
+        imageDTO.setImageURL(imageUrl);
+
+        Image image = mapImageDTOToEntity.map(imageDTO);
+        image.setStep(step); // Imposta lo step per l'immagine
+
+        log.info("Adding image to step: {}", image);
+
+        List<Image> images = step.getImages();
+        if (images == null) {
+            images = new ArrayList<>();
+        }
+        images.add(image);
+        step.setImages(images);
+
+        log.info("Step before save: {}", step);
+
+        stepRepository.save(step);
+
+        Step savedStep = stepRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+        log.info("Step after save: {}", savedStep);
+
+        return stepEntityToResponseMapper.map(savedStep);
+    }
+
+
+
+
+
 }
 

@@ -11,6 +11,7 @@ import com.caminando.Caminando.datalayer.repositories.UserRepository;
 import com.caminando.Caminando.datalayer.repositories.travel.PositionRepository;
 import com.caminando.Caminando.datalayer.repositories.travel.TripRepository;
 import com.caminando.Caminando.presentationlayer.api.exceptions.ApiValidationException;
+import com.caminando.Caminando.presentationlayer.api.exceptions.NotFoundException;
 import com.caminando.Caminando.presentationlayer.api.models.StepPositionModel;
 import com.caminando.Caminando.presentationlayer.api.models.travel.PositionModel;
 import com.caminando.Caminando.presentationlayer.api.models.travel.StepModel;
@@ -25,10 +26,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -81,7 +85,8 @@ public class StepController {
     }
 
     @PostMapping("{id}/create")
-    public ResponseEntity<StepResponseDTO> save(@RequestBody @Validated StepPositionModel model, @PathVariable("id") Long Id, BindingResult validator ) {
+    @Transactional
+    public ResponseEntity<StepResponseDTO> save(@RequestBody @Validated StepPositionModel model, @PathVariable("id") Long id, BindingResult validator) {
         if (validator.hasErrors()) {
             throw new ApiValidationException(validator.getAllErrors());
         }
@@ -90,16 +95,14 @@ public class StepController {
             String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
             User user = userRepository.findOneByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
+            log.info("User found: {}", user);
 
             RegisteredUserDTO userDTO = userToRegistered.map(user);
 
-            Trip trip = tripRepository.findByIdAndUserId(Id, user.getId())
+            // Recupera il trip
+            Trip trip = tripRepository.findByIdAndUserId(id, user.getId())
                     .orElseThrow(() -> new EntityNotFoundException("Trip not found or not accessible by this user"));
-
-            // Ensure the trip is saved
-            if (trip.getId() == null) {
-                trip = tripRepository.save(trip);
-            }
+            log.info("Trip found: {}", trip);
 
             TripResponseDTO tripResponse = entityToResponse.map(trip);
 
@@ -112,8 +115,7 @@ public class StepController {
                     .build();
             PositionResponseDTO pResponse = requestToResponse.map(positionRequestDTO);
             log.info("PositionRequestDTO built: {}", positionRequestDTO);
-
-            log.info("position response: {}", pResponse);
+            log.info("Position response: {}", pResponse);
 
             StepRequestDTO stepRequestDTO = StepRequestDTO.builder()
                     .withDescription(model.step().description())
@@ -123,22 +125,21 @@ public class StepController {
                     .withPosition(pResponse)
                     .withTrip(tripResponse)
                     .build();
-
             log.info("StepRequestDTO built: {}", stepRequestDTO);
 
-            StepResponseDTO stepResponse = stepResponseToRequest.map(stepRequestDTO);
-            log.info("SteResponse {}", stepResponse);
-
-
-            positionRequestDTO.setStep(stepResponse);
-            stepResponse = stepService.save(stepRequestDTO, Id, positionRequestDTO);
+            StepResponseDTO stepResponse = stepService.save(stepRequestDTO, id, positionRequestDTO);
+            log.info("StepResponseDTO built: {}", stepResponse);
 
             return new ResponseEntity<>(stepResponse, HttpStatus.CREATED);
+        } catch (EntityNotFoundException ex) {
+            log.error("Trip not found or not accessible by this user: {}", ex.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         } catch (RuntimeException ex) {
-            log.info("Error saving step", ex);
+            log.error("Error saving step", ex);
             return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
         }
     }
+
 
 
     @PutMapping("/{id}")
@@ -160,5 +161,19 @@ public class StepController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PatchMapping("/{id}/images")
+    public ResponseEntity<StepResponseDTO> uploadStepImages(@PathVariable Long id, @RequestParam("files") MultipartFile files) {
+        try {
+            StepResponseDTO stepResponseDTO = stepService.saveImage(id, files);
+            return ResponseEntity.status(HttpStatus.CREATED).body(stepResponseDTO);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
 }
 

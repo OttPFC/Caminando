@@ -43,9 +43,9 @@ public class User extends BaseEntity {
     @Column(length = 50)
     private String city;
 
-    private Long follow;
+    private Long follow = 0L;
 
-    private Long followers;
+    private Long followers = 0L;
 
     @Column(nullable = false)
     private boolean isEnabled;

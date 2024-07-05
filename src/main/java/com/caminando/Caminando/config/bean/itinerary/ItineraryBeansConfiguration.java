@@ -3,8 +3,10 @@ package com.caminando.Caminando.config.bean.itinerary;
 import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
 import com.caminando.Caminando.businesslayer.services.dto.itinerary.*;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RolesResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.datalayer.entities.Image;
+import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.itinerary.SuggestItinerary;
 import com.caminando.Caminando.datalayer.entities.itinerary.entityplace.*;
 import com.caminando.Caminando.datalayer.entities.travel.User;
@@ -82,13 +84,12 @@ public class ItineraryBeansConfiguration {
             return null;
         }
         return User.builder()
-
                 .withFirstName(userDTO.getFirstName())
                 .withLastName(userDTO.getLastName())
                 .withUsername(userDTO.getUsername())
                 .withCity(userDTO.getCity())
                 .withEmail(userDTO.getEmail())
-                .withRoles(userDTO.getRoles())
+                .withRoles(userDTO.getRoles().stream().map(this::toRoleEntity).collect(Collectors.toList()))
                 .build();
     }
     private RegisteredUserDTO toRegisteredUserDTO(User user) {
@@ -99,7 +100,7 @@ public class ItineraryBeansConfiguration {
                 .withUsername(user.getUsername())
                 .withCity(user.getCity())
                 .withEmail(user.getEmail())
-                .withRoles(user.getRoles())
+                .withRoles(user.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                 .build();
     }
 
@@ -243,5 +244,23 @@ public class ItineraryBeansConfiguration {
                 .withImage(toImageEntity(foodDTO.getImage()))
                 .withSuggestItinerary(toSuggestItineraryEntity(foodDTO.getSuggestItinerary()))
                 .build();
+    }
+
+    private RolesResponseDTO toRoleDTO(RoleEntity roleEntity) {
+        if (roleEntity == null) {
+            return null;
+        }
+        return RolesResponseDTO.builder()
+                .withRoleType(roleEntity.getRoleType())
+                .build();
+    }
+
+    private RoleEntity toRoleEntity(RolesResponseDTO roleDTO) {
+        if (roleDTO == null) {
+            return null;
+        }
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setRoleType(roleDTO.getRoleType());
+        return roleEntity;
     }
 }

@@ -119,6 +119,8 @@ public class SecurityConfig {
 						//---------------------------------------------------------------------------
 						.requestMatchers(HttpMethod.PATCH, "/api/user/{id}/profile-image").authenticated()
 						.requestMatchers(HttpMethod.PATCH, "/api/trips/{id}/image").authenticated()
+						.requestMatchers(HttpMethod.PATCH, "/api/steps/{id}/image").authenticated()
+						.requestMatchers(HttpMethod.PATCH, "/api/steps/{id}/image").hasAuthority("ADMIN")
 
 						//ITINERARY
 						.requestMatchers(HttpMethod.PATCH, "/api/itinerary").hasAuthority("ADMIN")

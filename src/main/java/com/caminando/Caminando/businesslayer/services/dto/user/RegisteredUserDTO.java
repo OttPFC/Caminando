@@ -33,7 +33,7 @@ public class RegisteredUserDTO {
     boolean enabled;
     Long follow;
     Long followers;
-    List<RoleEntity> roles;
+    List<RolesResponseDTO> roles;
     ImageResponseDTO image;
     List<TripResponseDTO> trips;
 

@@ -12,5 +12,5 @@ import java.io.IOException;
 
 public interface TripService extends CRUDService<TripResponseDTO, TripRequestDTO> {
         Trip getTripByIdAndUserId(Long tripId, Long userId);
-TripResponseDTO saveImage (Long id, MultipartFile file) throws IOException;;
+TripResponseDTO saveImage (Long id, MultipartFile file) throws IOException;
 }

@@ -202,22 +202,35 @@ public class ItineraryGenericBeansConfiguration {
 
     @Bean
     @Scope("singleton")
-    public Mapper<RoleEntity, RoleEntityDTO> mapRoleEntityToDTO() {
+    public Mapper<RoleEntity, RoleEntityDTO> mapRoleEntityToDTO2() {
         return (input) -> RoleEntityDTO.builder()
                 .withRoleType(input.getRoleType())
                 .build();
     }
-    @Bean
-    @Scope("singleton")
-    public Mapper<RoleEntity, RolesResponseDTO> mapRoleEntityToResponse() {
-        return (input) -> RolesResponseDTO.builder()
-                .withRoleType(input.getRoleType())
-                .build();
-    }
+//    @Bean
+//    @Scope("singleton")
+//    public Mapper<RoleEntity, RolesResponseDTO> mapRoleEntityToResponse() {
+//        return (input) -> RolesResponseDTO.builder()
+//                .withRoleType(input.getRoleType())
+//                .build();
+//    }
 
 
     // Helper methods
 
+    private User toUserEntity(RegisteredUserDTO userDTO) {
+        if (userDTO == null) {
+            return null;
+        }
+        return User.builder()
+                .withFirstName(userDTO.getFirstName())
+                .withLastName(userDTO.getLastName())
+                .withUsername(userDTO.getUsername())
+                .withCity(userDTO.getCity())
+                .withEmail(userDTO.getEmail())
+                .withRoles(userDTO.getRoles().stream().map(this::toRoleEntity).collect(Collectors.toList()))
+                .build();
+    }
     private RegisteredUserDTO toRegisteredUserDTO(User user) {
         return RegisteredUserDTO.builder()
                 .withId(user.getId())
@@ -226,21 +239,7 @@ public class ItineraryGenericBeansConfiguration {
                 .withUsername(user.getUsername())
                 .withCity(user.getCity())
                 .withEmail(user.getEmail())
-                .withRoles(user.getRoles())
-                .build();
-    }
-    private User toUserEntity(RegisteredUserDTO userDTO) {
-        if (userDTO == null) {
-            return null;
-        }
-        return User.builder()
-
-                .withFirstName(userDTO.getFirstName())
-                .withLastName(userDTO.getLastName())
-                .withUsername(userDTO.getUsername())
-                .withCity(userDTO.getCity())
-                .withEmail(userDTO.getEmail())
-                .withRoles(userDTO.getRoles())
+                .withRoles(user.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                 .build();
     }
     private SuggestItineraryDTO toSuggestItineraryDTO(SuggestItinerary suggestItinerary) {
@@ -380,5 +379,23 @@ public class ItineraryGenericBeansConfiguration {
                 .withImage(toImageEntity(foodDTO.getImage()))
                 .withSuggestItinerary(toSuggestItineraryEntity(foodDTO.getSuggestItinerary()))
                 .build();
+    }
+
+    private RolesResponseDTO toRoleDTO(RoleEntity roleEntity) {
+        if (roleEntity == null) {
+            return null;
+        }
+        return RolesResponseDTO.builder()
+                .withRoleType(roleEntity.getRoleType())
+                .build();
+    }
+
+    private RoleEntity toRoleEntity(RolesResponseDTO roleDTO) {
+        if (roleDTO == null) {
+            return null;
+        }
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setRoleType(roleDTO.getRoleType());
+        return roleEntity;
     }
 }

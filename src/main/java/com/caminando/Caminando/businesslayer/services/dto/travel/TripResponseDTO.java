@@ -27,7 +27,7 @@ public class TripResponseDTO extends BaseDTO {
     private LocalDate endDate;
     private Status status;
     private Privacy privacy;
-    private RegisteredUserDTO user; // Oggetto utente completo per la risposta
+    private RegisteredUserDTO user;
     private List<StepResponseDTO> steps;
     private ImageResponseDTO coverImage;
 

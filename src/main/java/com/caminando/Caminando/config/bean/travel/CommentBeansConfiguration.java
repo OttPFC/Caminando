@@ -4,8 +4,10 @@ import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
 import com.caminando.Caminando.businesslayer.services.dto.ImageResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.*;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
+import com.caminando.Caminando.businesslayer.services.dto.user.RolesResponseDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
 import com.caminando.Caminando.datalayer.entities.Image;
+import com.caminando.Caminando.datalayer.entities.RoleEntity;
 import com.caminando.Caminando.datalayer.entities.travel.Comment;
 import com.caminando.Caminando.datalayer.entities.travel.Step;
 import com.caminando.Caminando.datalayer.entities.travel.Trip;
@@ -85,13 +87,12 @@ public class CommentBeansConfiguration {
             return null;
         }
         return User.builder()
-
                 .withFirstName(userDTO.getFirstName())
                 .withLastName(userDTO.getLastName())
                 .withUsername(userDTO.getUsername())
                 .withCity(userDTO.getCity())
                 .withEmail(userDTO.getEmail())
-                .withRoles(userDTO.getRoles())
+                .withRoles(userDTO.getRoles().stream().map(this::toRoleEntity).collect(Collectors.toList()))
                 .build();
     }
     private RegisteredUserDTO toRegisteredUserDTO(User user) {
@@ -102,7 +103,7 @@ public class CommentBeansConfiguration {
                 .withUsername(user.getUsername())
                 .withCity(user.getCity())
                 .withEmail(user.getEmail())
-                .withRoles(user.getRoles())
+                .withRoles(user.getRoles().stream().map(this::toRoleDTO).collect(Collectors.toList()))
                 .build();
     }
 
@@ -175,6 +176,23 @@ public class CommentBeansConfiguration {
                 .withImageURL(image.getImageURL())
                 .withDescription(image.getDescription())
                 .build();
+    }
+    private RolesResponseDTO toRoleDTO(RoleEntity roleEntity) {
+        if (roleEntity == null) {
+            return null;
+        }
+        return RolesResponseDTO.builder()
+                .withRoleType(roleEntity.getRoleType())
+                .build();
+    }
+
+    private RoleEntity toRoleEntity(RolesResponseDTO roleDTO) {
+        if (roleDTO == null) {
+            return null;
+        }
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setRoleType(roleDTO.getRoleType());
+        return roleEntity;
     }
 }
 
