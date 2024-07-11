@@ -20,7 +20,6 @@ public class StepResponseDTO extends BaseDTO {
     private Integer likes;
     private LocalDate arrivalDate;
     private LocalDate departureDate;
-    @JsonIgnore
     private TripResponseDTO trip;
     private List<CommentResponseDTO> comments;
     private List<ImageResponseDTO> images;

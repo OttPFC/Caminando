@@ -1,6 +1,7 @@
 package com.caminando.Caminando.businesslayer.services.impl.travel;
 
 import com.caminando.Caminando.businesslayer.services.dto.ImageDTO;
+import com.caminando.Caminando.businesslayer.services.dto.ImageResponseDTO;
 import com.caminando.Caminando.businesslayer.services.dto.travel.*;
 import com.caminando.Caminando.businesslayer.services.dto.user.RegisteredUserDTO;
 import com.caminando.Caminando.businesslayer.services.interfaces.generic.Mapper;
@@ -31,9 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -113,16 +113,49 @@ public class StepServiceImpl implements StepService {
         Optional<Step> optionalStep = stepRepository.findById(id);
         if (optionalStep.isPresent()) {
             Step existingStep = optionalStep.get();
+
             // Copia i campi dal DTO all'entità
             existingStep.setDescription(stepRequestDTO.getDescription());
             existingStep.setLikes(stepRequestDTO.getLikes());
             existingStep.setArrivalDate(stepRequestDTO.getArrivalDate());
             existingStep.setDepartureDate(stepRequestDTO.getDepartureDate());
+
+            // Gestione delle immagini
+            List<ImageResponseDTO> imageDTOs = stepRequestDTO.getImages();
+            if (imageDTOs != null) {
+                // Creiamo una mappa delle immagini esistenti per un accesso più veloce
+                Map<Long, Image> existingImagesMap = existingStep.getImages().stream()
+                        .collect(Collectors.toMap(Image::getId, image -> image));
+
+                List<Image> updatedImages = new ArrayList<>();
+                for (ImageResponseDTO imageResponseDTO : imageDTOs) {
+                    Image image;
+                    if (imageResponseDTO.getId() != null && existingImagesMap.containsKey(imageResponseDTO.getId())) {
+                        // Aggiorniamo l'immagine esistente
+                        image = existingImagesMap.get(imageResponseDTO.getId());
+                        image.setImageURL(imageResponseDTO.getImageURL());
+                    } else {
+                        // Aggiungiamo una nuova immagine
+                        ImageDTO imageDTO = new ImageDTO();
+                        imageDTO.setImageURL(imageResponseDTO.getImageURL());
+                        image = mapImageDTOToEntity.map(imageDTO);
+                        image.setStep(existingStep);
+                    }
+                    updatedImages.add(image);
+                }
+                // Impostiamo la collezione aggiornata di immagini
+                existingStep.getImages().clear();
+                existingStep.getImages().addAll(updatedImages);
+            }
+
             Step updatedStep = stepRepository.save(existingStep);
             return stepEntityToResponseMapper.map(updatedStep);
         }
         return null;
     }
+
+
+
 
     @Override
     @Transactional

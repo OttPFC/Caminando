@@ -39,7 +39,7 @@ public class ImageController {
         return new ResponseEntity<>(createdImage, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ImageResponseDTO> updateImage(@PathVariable Long id, @RequestBody ImageDTO imageDTO) {
         ImageResponseDTO updatedImage = imageService.update(id, imageDTO);
         if (updatedImage != null) {

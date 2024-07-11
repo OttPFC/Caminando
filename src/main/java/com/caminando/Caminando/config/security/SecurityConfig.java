@@ -62,6 +62,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/trips").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/trips/{id}").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/steps").authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/steps/{id}").authenticated()
 						// ------------------------------------------------------------------------
 						.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
@@ -78,10 +79,12 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PATCH, "/api/user/{id}/profile-image").authenticated()
 						.requestMatchers(HttpMethod.PATCH, "/api/trips/{id}/image").authenticated()
 						.requestMatchers(HttpMethod.PATCH, "/api/steps/{id}/images").authenticated()
-						.requestMatchers(HttpMethod.DELETE, "/api/trips/{id}").authenticated()
+						.requestMatchers(HttpMethod.PATCH, "/api/images/{id}").authenticated()
 
+						.requestMatchers(HttpMethod.DELETE, "/api/trips/{id}").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/api/steps/{id}").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/api/trips/{id}").authenticated()
+						.requestMatchers(HttpMethod.DELETE, "/api/images/{id}").authenticated()
 						//ADMIN
 						.requestMatchers(HttpMethod.GET, "/**").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.POST, "/**").hasAuthority("ADMIN")
