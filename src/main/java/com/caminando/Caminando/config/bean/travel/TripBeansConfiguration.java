@@ -51,7 +51,7 @@ public class TripBeansConfiguration {
                 .withEndDate(input.getEndDate())
                 .withStatus(input.getStatus())
                 .withPrivacy(input.getPrivacy())
-                .withUser(toRegisteredUserDTO(input.getUser()))
+                //.withUser(toRegisteredUserDTO(input.getUser()))
                 .withSteps(input.getSteps() != null ? input.getSteps().stream().map(this::toStepResponseDTO).collect(Collectors.toList()) : Collections.emptyList())
                 .withCoverImage(input.getCoverImage() != null ? toImageDTO(input.getCoverImage()) : null)
                 .build();

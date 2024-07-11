@@ -76,10 +76,6 @@ public class TripController {
         }
     }
 
-
-
-
-
     @GetMapping("/{id}")
     public ResponseEntity<TripResponseDTO> getTripById(@PathVariable Long id) {
         TripResponseDTO trip = tripService.getById(id);
@@ -125,4 +121,6 @@ public class TripController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
 }

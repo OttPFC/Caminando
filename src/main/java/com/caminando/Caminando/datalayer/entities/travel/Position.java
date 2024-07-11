@@ -23,7 +23,7 @@ public class Position extends BaseEntity {
 
     private LocalDate timestamp;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 150, nullable = false)
     private String nomeLocalita;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

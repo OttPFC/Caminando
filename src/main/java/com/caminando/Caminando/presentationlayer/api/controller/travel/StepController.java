@@ -163,7 +163,7 @@ public class StepController {
     }
 
     @PatchMapping("/{id}/images")
-    public ResponseEntity<StepResponseDTO> uploadStepImages(@PathVariable Long id, @RequestParam("files") MultipartFile files) {
+    public ResponseEntity<StepResponseDTO> uploadStepImages(@PathVariable Long id, @RequestParam("files") MultipartFile[] files) {
         try {
             StepResponseDTO stepResponseDTO = stepService.saveImage(id, files);
             return ResponseEntity.status(HttpStatus.CREATED).body(stepResponseDTO);
@@ -173,6 +173,7 @@ public class StepController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 
 
 }

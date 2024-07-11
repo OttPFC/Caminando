@@ -226,6 +226,7 @@ public class StepBeansConfiguration {
             return null;
         }
         return PositionResponseDTO.builder()
+                .withId(position.getId())
                 .withLatitude(position.getLatitude())
                 .withLongitude(position.getLongitude())
                 .withNomeLocalita(position.getNomeLocalita())
@@ -275,6 +276,7 @@ public class StepBeansConfiguration {
             return null;
         }
         return ImageResponseDTO.builder()
+                .withId(image.getId())
                 .withImageURL(image.getImageURL())
                 .withDescription(image.getDescription())
                 .build();

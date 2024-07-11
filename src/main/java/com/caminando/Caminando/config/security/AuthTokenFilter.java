@@ -38,7 +38,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 					String username = jwtUtils.getUsernameFromToken(token);
 					log.info("Username from Token: {}", username);
 					UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-					log.info("UserDetails: {}", userDetails);
+					log.info("UserDetails: {}", userDetails.getAuthorities());
 					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,7 +56,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 	}
 
 	private String extractToken(String header) {
-		// Split and return the first token if multiple tokens are present
 		return header.split(",")[0].substring(7).trim();
 	}
 }

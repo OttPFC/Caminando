@@ -138,34 +138,36 @@ public class StepServiceImpl implements StepService {
 
 
     @Override
-    public StepResponseDTO saveImage(Long id, MultipartFile file) throws IOException {
+    public StepResponseDTO saveImage(Long id, MultipartFile[] files) throws IOException {
         Step step = stepRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
 
         Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-        var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-        String imageUrl = (String) uploadResult.get("url");
-
-        if (imageUrl == null) {
-            throw new IOException("Failed to upload image to Cloudinary");
-        }
-
-        ImageDTO imageDTO = new ImageDTO();
-        imageDTO.setImageURL(imageUrl);
-
-        Image image = mapImageDTOToEntity.map(imageDTO);
-        image.setStep(step); // Imposta lo step per l'immagine
-
-        log.info("Adding image to step: {}", image);
-
         List<Image> images = step.getImages();
         if (images == null) {
             images = new ArrayList<>();
         }
-        images.add(image);
+
+        for (MultipartFile file : files) {
+            var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+            String imageUrl = (String) uploadResult.get("url");
+
+            if (imageUrl == null) {
+                throw new IOException("Failed to upload image to Cloudinary");
+            }
+
+            ImageDTO imageDTO = new ImageDTO();
+            imageDTO.setImageURL(imageUrl);
+
+            Image image = mapImageDTOToEntity.map(imageDTO);
+            image.setStep(step); // Imposta lo step per l'immagine
+
+            log.info("Adding image to step: {}", image);
+            images.add(image);
+        }
+
         step.setImages(images);
 
         log.info("Step before save: {}", step);
-
         stepRepository.save(step);
 
         Step savedStep = stepRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
@@ -173,6 +175,7 @@ public class StepServiceImpl implements StepService {
 
         return stepEntityToResponseMapper.map(savedStep);
     }
+
 
 
 

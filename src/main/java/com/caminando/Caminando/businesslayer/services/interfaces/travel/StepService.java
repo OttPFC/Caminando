@@ -21,5 +21,5 @@ public interface StepService {
     StepResponseDTO update(Long id, StepRequestDTO request);
     StepResponseDTO save(StepRequestDTO stepRequestDTO, Long tripId, PositionRequestDTO position);
 
-    StepResponseDTO saveImage (Long id, MultipartFile file) throws IOException;;
+    StepResponseDTO saveImage (Long id, MultipartFile[] file) throws IOException;;
 }

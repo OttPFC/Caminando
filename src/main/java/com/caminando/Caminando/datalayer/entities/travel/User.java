@@ -50,7 +50,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private boolean isEnabled;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @BatchSize(size = 10)
     @JsonManagedReference
     @ToString.Exclude
@@ -66,12 +66,7 @@ public class User extends BaseEntity {
     @JoinColumn(name = "profile_image_id")
     private Image profileImage;
 
-    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RoleEntity> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

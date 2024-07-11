@@ -34,7 +34,6 @@ public class Image extends BaseEntity {
 
     @OneToOne(mappedBy = "coverImage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonBackReference
-    @JsonIgnore
     private Trip trip;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -72,4 +71,13 @@ public class Image extends BaseEntity {
     @JsonBackReference
     @JsonIgnore
     private Food food;
+
+    @Override
+    public String toString() {
+        return "Image{" +
+                "id=" + getId() +
+                ", imageURL='" + imageURL + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

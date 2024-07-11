@@ -73,6 +73,7 @@ public class PositionBeansConfiguration {
     public Mapper<Position, PositionResponseDTO> mapPositionEntityToResponse() {
         return (input) -> PositionResponseDTO.builder()
                 .withId(input.getId())
+                .withId(input.getId())
                 .withLatitude(input.getLatitude())
                 .withLongitude(input.getLongitude())
                 .withTimestamp(input.getTimestamp())

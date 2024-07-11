@@ -49,5 +49,16 @@ public class Step extends BaseEntity {
     @JsonManagedReference(value = "step-position")
     private Position position;
 
+    @Override
+    public String toString() {
+        return "Step{" +
+                "id=" + getId() +
+                ", description='" + description + '\'' +
+                ", likes=" + likes +
+                ", arrivalDate=" + arrivalDate +
+                ", departureDate=" + departureDate +
+                '}';
+    }
+
 
 }

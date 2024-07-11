@@ -87,7 +87,7 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public TripResponseDTO update(Long id, TripRequestDTO tripRequestDTO) {
-        // Recupera il trip esistente dal repository
+        log.info("Updating trip with id: {}", id);
         Trip existingTrip = tripRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(id));
 
@@ -98,6 +98,7 @@ public class TripServiceImpl implements TripService {
 
         // Verifica se l'utente attuale è il proprietario del trip
         if (!existingTrip.getUser().getId().equals(user.getId())) {
+            log.warn("User {} not authorized to update trip {}", username, id);
             throw new RuntimeException("User not authorized to update this trip");
         }
 
@@ -122,16 +123,23 @@ public class TripServiceImpl implements TripService {
 
         // Se c'è un'immagine di copertina aggiornata, mappala e impostala
         if (tripRequestDTO.getCoverImage() != null) {
+            log.info("Updating cover image for trip {}", id);
             Image coverImage = responseToEntity.map(tripRequestDTO.getCoverImage());
             existingTrip.setCoverImage(coverImage);
         }
 
-        // Salva le modifiche
-        Trip updatedTrip = tripRepository.save(existingTrip);
+        try {
+            // Salva le modifiche
+            Trip updatedTrip = tripRepository.save(existingTrip);
 
-        // Restituisci il TripResponseDTO mappato dall'entità aggiornata
-        return tripEntityToResponseMapper.map(updatedTrip);
+            // Restituisci il TripResponseDTO mappato dall'entità aggiornata
+            return tripEntityToResponseMapper.map(updatedTrip);
+        } catch (Exception e) {
+            log.error("Error updating trip with id: {}", id, e);
+            throw new RuntimeException("Failed to update trip", e);
+        }
     }
+
 
 
 
@@ -149,9 +157,10 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
+    @Transactional
     public TripResponseDTO saveImage(Long id, MultipartFile file) throws IOException {
+        log.info("Saving image for trip with id: {}", id);
         Trip trip = tripRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
-
 
         Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
         var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
@@ -162,7 +171,8 @@ public class TripServiceImpl implements TripService {
         trip.setCoverImage(mapImageDTOToEntity.map(image));
 
         tripRepository.save(trip);
-
+        log.info("Image saved for trip with id: {}", id);
         return tripEntityToResponseMapper.map(trip);
     }
+
 }

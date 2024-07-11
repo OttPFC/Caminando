@@ -58,77 +58,37 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.authorizeHttpRequests(authorize -> authorize
-
 						.requestMatchers(HttpMethod.GET, "/api/user/{id}").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/trips").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/trips/{id}").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/steps").authenticated()
-
-						//ADMIN
-						.requestMatchers(HttpMethod.GET, "/**").hasAuthority("ADMIN")
 						// ------------------------------------------------------------------------
 						.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/trips").authenticated()
-						.requestMatchers(HttpMethod.POST, "/api/steps/create").authenticated()
-						//ITINERARY
-						.requestMatchers(HttpMethod.POST, "/api/itinerary").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/api/itinerary/{id}").hasAuthority("ADMIN")
-
-						//TO-DO
-						.requestMatchers(HttpMethod.POST, "/api/todo").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/api/todo/{id}").hasAuthority("ADMIN")
-						//RESTAURANT
-						.requestMatchers(HttpMethod.POST, "/api/restaurant").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/api/restaurant/{id}").hasAuthority("ADMIN")
-						//FOOD
-						.requestMatchers(HttpMethod.POST, "/api/food").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/api/food/{id}").hasAuthority("ADMIN")
-						//QUICK
-						.requestMatchers(HttpMethod.POST, "/api/quick-fact").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/api/quick-fact/{id}").hasAuthority("ADMIN")
-						//PLACE
-						.requestMatchers(HttpMethod.POST, "/api/place-to-stay").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.POST, "/api/place-to-stay/{id}").hasAuthority("ADMIN")
-						//---------------------------------------------------------------------------
-
-						//ITINERARY
-						.requestMatchers(HttpMethod.PUT, "/api/itinerary").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/itinerary/{id}").hasAuthority("ADMIN")
-						//TO-DO
-						.requestMatchers(HttpMethod.PUT, "/api/todo").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/todo/{id}").hasAuthority("ADMIN")
-						//RESTAURANT
-						.requestMatchers(HttpMethod.PUT, "/api/restaurant").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/restaurant/{id}").hasAuthority("ADMIN")
-						//FOOD
-						.requestMatchers(HttpMethod.PUT, "/api/food").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/food/{id}").hasAuthority("ADMIN")
-						//QUICK
-						.requestMatchers(HttpMethod.PUT, "/api/quick-fact").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/quick-fact/{id}").hasAuthority("ADMIN")
-						//PLACE
-						.requestMatchers(HttpMethod.PUT, "/api/place-to-stay").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/place-to-stay/{id}").hasAuthority("ADMIN")
-						//ADMIN
-						.requestMatchers(HttpMethod.PUT, "/**").hasAuthority("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/api/steps/{id}/create").authenticated()
+						//.requestMatchers(HttpMethod.POST, "/api/steps/create").authenticated()
+						// ------------------------------------------------------------------------
 						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").hasAuthority("USER")
 						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/trips/{id}/image").authenticated()
 						.requestMatchers(HttpMethod.PUT,"/api/trips/{id}").authenticated()
+						.requestMatchers(HttpMethod.PUT,"/api/steps/{id}").authenticated()
 						//---------------------------------------------------------------------------
 						.requestMatchers(HttpMethod.PATCH, "/api/user/{id}/profile-image").authenticated()
 						.requestMatchers(HttpMethod.PATCH, "/api/trips/{id}/image").authenticated()
-						.requestMatchers(HttpMethod.PATCH, "/api/steps/{id}/image").authenticated()
-						.requestMatchers(HttpMethod.PATCH, "/api/steps/{id}/image").hasAuthority("ADMIN")
+						.requestMatchers(HttpMethod.PATCH, "/api/steps/{id}/images").authenticated()
+						.requestMatchers(HttpMethod.DELETE, "/api/trips/{id}").authenticated()
 
-						//ITINERARY
-						.requestMatchers(HttpMethod.PATCH, "/api/itinerary").hasAuthority("ADMIN")
-						.requestMatchers(HttpMethod.PATCH, "/api/itinerary/{id}").hasAuthority("ADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/api/steps/{id}").authenticated()
+						.requestMatchers(HttpMethod.DELETE, "/api/trips/{id}").authenticated()
 						//ADMIN
+						.requestMatchers(HttpMethod.GET, "/**").hasAuthority("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/**").hasAuthority("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/**").hasAuthority("ADMIN")
 						.requestMatchers(HttpMethod.PATCH, "/**").hasAuthority("ADMIN")
-
 						.requestMatchers(HttpMethod.DELETE, "/**").hasAuthority("ADMIN")
+
 						.anyRequest().authenticated()
 				)
 				.httpBasic(Customizer.withDefaults())
