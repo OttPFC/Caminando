@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -155,6 +156,13 @@ public class UserServiceImpl implements UserService {
         return usersRepository.findAll(pageable).map(mapRegisteredUser::map);
     }
 
+    @Override
+    public List<RegisteredUserDTO> searchUsersByFirstName(String firstName) {
+        List<User> users = usersRepository.findByFirstNameContainingIgnoreCase(firstName);
+        return users.stream()
+                .map(mapRegisteredUser::map)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public RegisteredUserDTO update(Long id, RegisteredUserDTO userDto) {

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserService{
@@ -19,6 +20,8 @@ public interface UserService{
     RegisteredUserDTO getById(long id);
 
     Page<RegisteredUserDTO> getAll(Pageable p);
+
+    List<RegisteredUserDTO> searchUsersByFirstName(String firstName);
 
     RegisteredUserDTO update(Long id, RegisteredUserDTO userDto);
 
