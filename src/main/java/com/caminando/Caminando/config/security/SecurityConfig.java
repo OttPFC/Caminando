@@ -70,7 +70,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/steps/{id}/create").authenticated()
 						//.requestMatchers(HttpMethod.POST, "/api/steps/create").authenticated()
 						// ------------------------------------------------------------------------
-						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").hasAuthority("USER")
+						//.requestMatchers(HttpMethod.PUT, "/api/user/{id}").hasAuthority("USER")
 						.requestMatchers(HttpMethod.PUT, "/api/user/{id}").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/trips/{id}/image").authenticated()
 						.requestMatchers(HttpMethod.PUT,"/api/trips/{id}").authenticated()

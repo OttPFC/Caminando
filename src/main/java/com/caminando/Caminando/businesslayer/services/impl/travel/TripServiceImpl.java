@@ -91,18 +91,15 @@ public class TripServiceImpl implements TripService {
         Trip existingTrip = tripRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(id));
 
-        // Recupera l'utente attuale
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findOneByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Verifica se l'utente attuale è il proprietario del trip
         if (!existingTrip.getUser().getId().equals(user.getId())) {
             log.warn("User {} not authorized to update trip {}", username, id);
             throw new RuntimeException("User not authorized to update this trip");
         }
 
-        // Mappa i valori dal TripRequestDTO all'entità Trip esistente
         existingTrip.setTitle(tripRequestDTO.getTitle());
         existingTrip.setDescription(tripRequestDTO.getDescription());
         existingTrip.setStartDate(tripRequestDTO.getStartDate());
@@ -111,17 +108,18 @@ public class TripServiceImpl implements TripService {
         existingTrip.setStatus(tripRequestDTO.getStatus());
         existingTrip.setPrivacy(tripRequestDTO.getPrivacy());
 
-        // Se ci sono delle steps, mappa e aggiungile al trip
         if (tripRequestDTO.getSteps() != null) {
             existingTrip.getSteps().clear();
             tripRequestDTO.getSteps().forEach(stepDTO -> {
-                Step step = new Step(); // supponiamo che ci sia un mapper o costruttore adeguato per creare Step da StepDTO
-                // mappa i campi dello stepDTO allo step
+                Step step = new Step();
+                step.setArrivalDate(stepDTO.getArrivalDate()); // Assicurati di impostare arrivalDate
+                step.setDepartureDate(stepDTO.getDepartureDate()); // Assicurati di impostare departureDate
+                step.setDescription(stepDTO.getDescription());
+                step.setTrip(existingTrip); // Associa il passo al viaggio
                 existingTrip.addStep(step);
             });
         }
 
-        // Se c'è un'immagine di copertina aggiornata, mappala e impostala
         if (tripRequestDTO.getCoverImage() != null) {
             log.info("Updating cover image for trip {}", id);
             Image coverImage = responseToEntity.map(tripRequestDTO.getCoverImage());
@@ -129,16 +127,14 @@ public class TripServiceImpl implements TripService {
         }
 
         try {
-            // Salva le modifiche
             Trip updatedTrip = tripRepository.save(existingTrip);
-
-            // Restituisci il TripResponseDTO mappato dall'entità aggiornata
             return tripEntityToResponseMapper.map(updatedTrip);
         } catch (Exception e) {
             log.error("Error updating trip with id: {}", id, e);
             throw new RuntimeException("Failed to update trip", e);
         }
     }
+
 
 
 
