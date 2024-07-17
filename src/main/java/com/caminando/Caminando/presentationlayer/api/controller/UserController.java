@@ -152,10 +152,10 @@ public class UserController {
             RegisteredUserDTO updatedUser = userService.saveProfileImage(id, file);
             return ResponseEntity.ok(updatedUser);
         } catch (IOException e) {
-            // Gestione dell'eccezione: restituisce una risposta con codice 500 e il messaggio di errore
+
             return ResponseEntity.status(500).body(null);
         } catch (NotFoundException e) {
-            // Gestione dell'eccezione: restituisce una risposta con codice 404 e il messaggio di errore
+
             return ResponseEntity.status(404).body(null);
         }
     }

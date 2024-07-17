@@ -141,7 +141,7 @@ public class TripBeansConfiguration {
                 // .withTrip(step.getTrip() != null ? toTripResponseDTO(step.getTrip()) : null)
                 .withComments(step.getComments() != null ? step.getComments().stream().map(this::toCommentResponseDTO).collect(Collectors.toList()) : Collections.emptyList())
                 .withImages(step.getImages() != null ? step.getImages().stream().map(this::toImageDTO).collect(Collectors.toList()) : Collections.emptyList())
-                .withPosition(toPositionResponseDTO(step.getPosition()))  // Converti Position in PositionResponseDTO
+                .withPosition(toPositionResponseDTO(step.getPosition()))
                 .build();
     }
 

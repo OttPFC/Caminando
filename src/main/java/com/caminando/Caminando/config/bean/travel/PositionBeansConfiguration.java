@@ -78,7 +78,7 @@ public class PositionBeansConfiguration {
                 .withLongitude(input.getLongitude())
                 .withTimestamp(input.getTimestamp())
                 .withNomeLocalita(input.getNomeLocalita())
-                .withStep(toStepRequestDTO(input.getStep())) // Modificato qui
+                .withStep(toStepRequestDTO(input.getStep()))
                 .build();
     }
 

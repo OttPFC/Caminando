@@ -113,7 +113,6 @@ public class StepServiceImpl implements StepService {
             existingStep.setArrivalDate(stepRequestDTO.getArrivalDate());
             existingStep.setDepartureDate(stepRequestDTO.getDepartureDate());
 
-
             List<ImageResponseDTO> imageDTOs = stepRequestDTO.getImages();
             if (imageDTOs != null) {
 
@@ -185,7 +184,7 @@ public class StepServiceImpl implements StepService {
             imageDTO.setImageURL(imageUrl);
 
             Image image = mapImageDTOToEntity.map(imageDTO);
-            image.setStep(step); // Imposta lo step per l'immagine
+            image.setStep(step);
 
             log.info("Adding image to step: {}", image);
             images.add(image);

@@ -63,7 +63,7 @@ public class ToDoServiceImpl implements ToDoService {
         Optional<ToDo> optionalToDo = toDoRepository.findById(id);
         if (optionalToDo.isPresent()) {
             ToDo existingToDo = optionalToDo.get();
-            // Aggiorna i campi dell'entità con i valori del DTO
+
             existingToDo.setTitle(toDoDTO.getTitle());
             existingToDo.setDescription(toDoDTO.getDescription());
             if (toDoDTO.getSuggestItinerary() != null) {

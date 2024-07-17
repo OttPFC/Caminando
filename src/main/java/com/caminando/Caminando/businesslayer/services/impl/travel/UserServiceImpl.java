@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
                 userEntity.setPassword(p);
                 var totalUsers = this.getAll(defaultPageable);
 
-                // Assicurati che la lista dei ruoli sia inizializzata
+
                 if (userEntity.getRoles() == null) {
                     userEntity.setRoles(new ArrayList<>());
                 }

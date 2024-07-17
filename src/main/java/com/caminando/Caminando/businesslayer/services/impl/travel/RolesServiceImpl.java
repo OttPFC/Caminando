@@ -54,7 +54,7 @@ public class RolesServiceImpl implements RolesService {
         Optional<RoleEntity> optionalRoleEntity = roleEntityRepository.findById(id);
         if (optionalRoleEntity.isPresent()) {
             RoleEntity existingRoleEntity = optionalRoleEntity.get();
-            existingRoleEntity.setRoleType(roleEntityDTO.getRoleType()); // assuming RoleEntity has a name property
+            existingRoleEntity.setRoleType(roleEntityDTO.getRoleType());
             RoleEntity updatedRoleEntity = roleEntityRepository.save(existingRoleEntity);
             return roleEntityToResponseMapper.map(updatedRoleEntity);
         }
