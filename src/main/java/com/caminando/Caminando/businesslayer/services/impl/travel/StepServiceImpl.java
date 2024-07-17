@@ -84,22 +84,15 @@ public class StepServiceImpl implements StepService {
     @Override
     @Transactional
     public StepResponseDTO save(StepRequestDTO stepRequestDTO, Long tripId, PositionRequestDTO positionRequestDTO) {
-        // Find the trip and ensure it exists
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new EntityNotFoundException("Trip not found"));
-
-        // Map and save the position
         Position position = positionDTOToEntityMapper.map(positionRequestDTO);
         position = positionRepository.save(position);
-
-        // Map and save the step
         Step step = stepDTOToEntityMapper.map(stepRequestDTO);
-        step.setTrip(trip); // Ensure the step has the saved trip
-        step.setPosition(position); // Link the saved position to the step
-
+        step.setTrip(trip);
+        step.setPosition(position);
         step = stepRepository.save(step);
 
-        // Update position with the saved step (if necessary)
         position.setStep(step);
         positionRepository.save(position);
 
@@ -114,16 +107,16 @@ public class StepServiceImpl implements StepService {
         if (optionalStep.isPresent()) {
             Step existingStep = optionalStep.get();
 
-            // Copia i campi dal DTO all'entità
+
             existingStep.setDescription(stepRequestDTO.getDescription());
             existingStep.setLikes(stepRequestDTO.getLikes());
             existingStep.setArrivalDate(stepRequestDTO.getArrivalDate());
             existingStep.setDepartureDate(stepRequestDTO.getDepartureDate());
 
-            // Gestione delle immagini
+
             List<ImageResponseDTO> imageDTOs = stepRequestDTO.getImages();
             if (imageDTOs != null) {
-                // Creiamo una mappa delle immagini esistenti per un accesso più veloce
+
                 Map<Long, Image> existingImagesMap = existingStep.getImages().stream()
                         .collect(Collectors.toMap(Image::getId, image -> image));
 
@@ -131,11 +124,11 @@ public class StepServiceImpl implements StepService {
                 for (ImageResponseDTO imageResponseDTO : imageDTOs) {
                     Image image;
                     if (imageResponseDTO.getId() != null && existingImagesMap.containsKey(imageResponseDTO.getId())) {
-                        // Aggiorniamo l'immagine esistente
+
                         image = existingImagesMap.get(imageResponseDTO.getId());
                         image.setImageURL(imageResponseDTO.getImageURL());
                     } else {
-                        // Aggiungiamo una nuova immagine
+
                         ImageDTO imageDTO = new ImageDTO();
                         imageDTO.setImageURL(imageResponseDTO.getImageURL());
                         image = mapImageDTOToEntity.map(imageDTO);
@@ -143,7 +136,7 @@ public class StepServiceImpl implements StepService {
                     }
                     updatedImages.add(image);
                 }
-                // Impostiamo la collezione aggiornata di immagini
+
                 existingStep.getImages().clear();
                 existingStep.getImages().addAll(updatedImages);
             }

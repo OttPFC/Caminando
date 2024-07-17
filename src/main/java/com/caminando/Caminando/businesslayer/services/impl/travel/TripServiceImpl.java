@@ -29,7 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -109,13 +112,24 @@ public class TripServiceImpl implements TripService {
         existingTrip.setPrivacy(tripRequestDTO.getPrivacy());
 
         if (tripRequestDTO.getSteps() != null) {
+            Map<Long, Step> existingStepsMap = existingTrip.getSteps().stream()
+                    .collect(Collectors.toMap(Step::getId, step -> step));
             existingTrip.getSteps().clear();
+
             tripRequestDTO.getSteps().forEach(stepDTO -> {
-                Step step = new Step();
-                step.setArrivalDate(stepDTO.getArrivalDate()); // Assicurati di impostare arrivalDate
-                step.setDepartureDate(stepDTO.getDepartureDate()); // Assicurati di impostare departureDate
+                Step step = existingStepsMap.getOrDefault(stepDTO.getId(), new Step());
+                step.setArrivalDate(stepDTO.getArrivalDate());
+                step.setDepartureDate(stepDTO.getDepartureDate());
                 step.setDescription(stepDTO.getDescription());
-                step.setTrip(existingTrip); // Associa il passo al viaggio
+                step.setTrip(existingTrip);
+
+                // Clear existing images but keep reference
+
+                List<Image> images = stepDTO.getImages().stream()
+                        .map(responseToEntity::map)
+                        .collect(Collectors.toList());
+                step.getImages().addAll(images);
+
                 existingTrip.addStep(step);
             });
         }
@@ -134,8 +148,6 @@ public class TripServiceImpl implements TripService {
             throw new RuntimeException("Failed to update trip", e);
         }
     }
-
-
 
 
 
